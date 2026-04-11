@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vani Kitchen Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f472b6;
+        }
+
+        /* Hilangkan panah pada input angka */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Layout Fixes */
+        .app-container {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        /* === LOGIKA CETAK (PRINT) === */
+        /* Sembunyikan elemen print saat mode layar biasa */
+        #print-section {
+            display: none;
+        }
+
+        /* Saat Ctrl+P atau fungsi Print dipanggil: */
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Sembunyikan aplikasi utama */
+            .app-container {
+                display: none !important;
+            }
+
+            /* Tampilkan hanya bagian setruk */
+            #print-section {
+                display: block !important;
+                padding: 20px;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 12px;
+                color: black;
+            }
+
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+
+            .print-table th,
+            .print-table td {
+                border-bottom: 1px dashed #000;
+                padding: 8px 4px;
+                text-align: left;
+            }
+
+            .print-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 15px; }
+            .print-header h1 { margin: 0; font-size: 18px; }
+            .print-header p { margin: 5px 0 0 0; font-size: 14px; }
+            .print-info { margin-bottom: 15px; }
+            .print-table .col-no { width: 30px; text-align: center; }
+            .print-table .col-qty, .print-table .col-unit { text-align: center; }
+            .print-table .col-rem { text-align: right; }
+            
+            .print-end-divider { text-align: center; margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 15px; }
+            .print-end-divider p { margin: 0; font-style: italic; font-weight: bold; }
+            
+            .signature-section { display: flex; justify-content: space-between; margin-top: 20px; page-break-inside: avoid; }
+            .signature-box { text-align: center; width: 30%; }
+            .signature-space { height: 50px; }
+            .signature-line { border-top: 1px dashed #000; width: 90%; margin: 0 auto; padding-top: 5px; font-size: 11px; font-weight: bold; }
+            .signature-name { font-weight: bold; margin-top: 5px; font-size: 11px; }
+            @page {
+                margin: 0.5cm;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <div class="app-container">
+
+        <header
+            class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-50">
+            <div class="flex items-center">
+                <div
+                    class="w-8 h-8 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold mr-3 shadow-md shadow-pink-200">
+                    PR</div>
+                <h1 class="text-lg font-bold tracking-tight text-slate-800">Vani Kitchen Management</h1>
+            </div>
+            <div id="status-badge"
+                class="hidden px-3 py-1 text-[10px] font-bold rounded-full bg-pink-100 text-pink-600 animate-pulse uppercase tracking-wider">
+                Status...
+            </div>
+        </header>
+
+        <div class="main-scroll">
+            <main class="max-w-6xl mx-auto px-4 lg:px-8">
+
+                <header class="h-12 flex items-center justify-center mb-4">
+                    <h2 id="header-title" class="text-base lg:text-lg font-bold text-slate-700">Form Purchase Request
+                    </h2>
+                </header>
+
+                <div id="view-form" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <form id="main-form">
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 mb-6">
+                            <div>
+                                <label for="id_pr" class="block text-[10px] font-bold text-slate-400 mb-1">NO. PR</label>
+                                <input type="text" id="id_pr" required placeholder="DPR-01"
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none uppercase font-semibold text-sm">
+                            </div>
+                            <div>
+                                <label for="tgl_request" class="block text-[10px] font-bold text-slate-400 mb-1">TGL REQUEST</label>
+                                <input type="date" id="tgl_request" required
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none font-semibold text-sm">
+                            </div>
+                            <div>
+                                <label for="tgl_butuh" class="block text-[10px] font-bold text-slate-400 mb-1">TGL BUTUH</label>
+                                <input type="date" id="tgl_butuh" required
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none font-semibold text-sm text-pink-600">
+                            </div>
+                            <div>
+                                <label for="departemen" class="block text-[10px] font-bold text-slate-400 mb-1">DEPARTEMEN</label>
+                                <input type="text" id="departemen" required value="F&B KITCHEN"
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none uppercase font-semibold text-sm">
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex justify-between items-end mb-3">
+                                <h3 class="text-sm font-bold text-slate-700">DAFTAR BARANG</h3>
+                                <button type="button" id="btn-add-row"
+                                    class="text-xs font-semibold bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition flex items-center">
+                                    + Tambah Baris
+                                </button>
+                            </div>
+                            <div class="border border-slate-200 rounded-xl overflow-x-auto bg-white">
+                                <table class="w-full text-left min-w-[700px]">
+                                    <thead
+                                        class="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase">
+                                        <tr>
+                                            <th class="py-3 px-4 w-12 text-center">NO</th>
+                                            <th class="py-3 px-4">DESCRIPTION</th>
+                                            <th class="py-3 px-4 w-24">QTY</th>
+                                            <th class="py-3 px-4 w-32">UNIT</th>
+                                            <th class="py-3 px-4 w-40">REMARK</th>
+                                            <th class="py-3 px-4 w-12"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-items" class="divide-y divide-slate-100 text-sm">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="submit"
+                                class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm shadow-md transition">
+                                Simpan Dokumen PR
+                            </button>
+                            <button type="button" id="btn-reset"
+                                class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-600 font-semibold py-2.5 px-6 rounded-xl text-sm transition">
+                                Kosongkan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="view-history" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-sm font-bold text-slate-700">SEMUA DOKUMEN PR</h3>
+                        <button id="btn-refresh"
+                            class="text-pink-600 hover:bg-pink-50 text-sm font-semibold flex items-center px-4 py-2 rounded-lg border border-pink-200 transition">
+                            Refresh Data
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table class="w-full text-left">
+                            <thead
+                                class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-bold">
+                                <tr>
+                                    <th class="py-3 px-4">DOKUMEN INFO</th>
+                                    <th class="py-3 px-4 w-1/2">BARANG</th>
+                                    <th class="py-3 px-4 text-center w-32">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-history" class="text-sm divide-y divide-slate-200">
+                                <tr>
+                                    <td colspan="3" class="py-8 text-center text-slate-400">Silahkan klik Refresh
+                                        Data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <nav
+            class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-around items-center h-16 z-50 px-6 pb-2">
+            <button id="nav-form" class="flex flex-col items-center justify-center space-y-1 text-pink-600 transition">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"></path>
+                </svg>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Buat PR</span>
+            </button>
+            <button id="nav-history"
+                class="flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Riwayat</span>
+            </button>
+        </nav>
+    </div>
+
+    <div id="print-section">
+        <div class="print-header">
+            <h1>PURCHASE REQUEST</h1>
+            <p id="print-dept">DEPARTEMEN</p>
+        </div>
+
+        <div class="print-info">
+            <div><b>NO PR :</b> <span id="print-id"></span></div>
+            <div><b>TGL REQ:</b> <span id="print-tgl-req"></span></div>
+            <div><b>TGL BTH:</b> <span id="print-tgl-bth"></span></div>
+        </div>
+
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th class="col-no">NO</th>
+                    <th>DESCRIPTION</th>
+                    <th class="col-qty">QTY</th>
+                    <th class="col-unit">UNIT</th>
+                    <th class="col-rem">REMARK</th>
+                </tr>
+            </thead>
+            <tbody id="print-items">
+            </tbody>
+        </table>
+
+        <div class="print-end-divider">
+            <p>--- END OF REQUEST ---</p>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-space"></div>
+                <div class="signature-line">DIBUAT OLEH</div>
+                <div class="signature-name">OKTIVANI NURJANAH</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-space"></div>
+                <div class="signature-line">DIPERIKSA OLEH</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-space"></div>
+                <div class="signature-line">DISETUJUI OLEH</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. KONFIGURASI URL APPS SCRIPT
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZ3MOrka7jzLlIki1QD3RvGTci4scXlHTehGGWv9nQ2HTdxi8YQFTupxX1aZNoPlYU/exec';
+        let dbRiwayat = [];
+        const units = ['GRM', 'KG', 'PCS', 'IKAT', 'BKS', 'LTR', 'ML', 'BOX', 'PACK', 'LBR', 'BTL', 'KALENG'];
+
+        // 2. FUNGSI NAVIGASI
+        function setActiveTab(tabName) {
+            const vForm = document.getElementById('view-form');
+            const vHist = document.getElementById('view-history');
+            const nForm = document.getElementById('nav-form');
+            const nHist = document.getElementById('nav-history');
+            const title = document.getElementById('header-title');
+
+            if (tabName === 'form') {
+                vForm.classList.remove('hidden');
+                vHist.classList.add('hidden');
+                title.innerText = "Form Purchase Request";
+
+                nForm.classList.replace('text-slate-400', 'text-pink-600');
+                nHist.classList.replace('text-pink-600', 'text-slate-400');
+            } else {
+                vForm.classList.add('hidden');
+                vHist.classList.remove('hidden');
+                title.innerText = "Riwayat Dokumen PR";
+
+                nHist.classList.replace('text-slate-400', 'text-pink-600');
+                nForm.classList.replace('text-pink-600', 'text-slate-400');
+
+                // Otomatis fetch jika data masih kosong
+                if (dbRiwayat.length === 0) fetchHistory();
+            }
+        }
+
+        // Listener Navigasi Bawah
+        document.getElementById('nav-form').addEventListener('click', () => setActiveTab('form'));
+        document.getElementById('nav-history').addEventListener('click', () => setActiveTab('history'));
+
+        // 3. FUNGSI MANAJEMEN BARIS (FORM)
+        function createRow(desc = '', qty = '', unit = 'GRM', remark = 'KITCHEN') {
+            const tbody = document.getElementById('table-items');
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 row-item";
+
+            // Bikin Dropdown Unit
+            let optHTML = '';
+            units.forEach(u => { optHTML += `<option value="${u}" ${unit === u ? 'selected' : ''}>${u}</option>`; });
+
+            tr.innerHTML = `
+                <td class="py-2 px-3 text-center text-slate-400 font-semibold row-no"></td>
+                <td class="py-2 px-3"><input type="text" title="Description" aria-label="Description" class="i-desc w-full outline-none bg-transparent uppercase border-b border-transparent focus:border-pink-300" value="${desc}" placeholder="Nama barang..." required></td>
+                <td class="py-2 px-3"><input type="number" title="Quantity" aria-label="Quantity" class="i-qty w-full outline-none bg-transparent text-center border-b border-transparent focus:border-pink-300" value="${qty}" placeholder="0" required></td>
+                <td class="py-2 px-3"><select title="Unit" aria-label="Unit" class="i-unit w-full outline-none bg-transparent font-semibold border-b border-transparent focus:border-pink-300 cursor-pointer">${optHTML}</select></td>
+                <td class="py-2 px-3"><input type="text" title="Remark" aria-label="Remark" class="i-rem w-full outline-none bg-transparent uppercase border-b border-transparent focus:border-pink-300" value="${remark}" placeholder="Remark" required></td>
+                <td class="py-2 px-3 text-center"><button type="button" title="Remove Row" aria-label="Remove Row" class="btn-del text-slate-400 hover:text-red-500 font-bold px-2 py-1 bg-slate-100 rounded hover:bg-red-50">X</button></td>
+            `;
+
+            // Event Hapus Baris
+            tr.querySelector('.btn-del').addEventListener('click', function () {
+                if (tbody.children.length > 1) {
+                    tr.remove();
+                    updateRowNumbers();
+                } else {
+                    alert("Minimal 1 barang harus ada.");
+                }
+            });
+
+            tbody.appendChild(tr);
+            updateRowNumbers();
+        }
+
+        function updateRowNumbers() {
+            const rows = document.querySelectorAll('.row-item');
+            rows.forEach((row, index) => { row.querySelector('.row-no').innerText = index + 1; });
+        }
+
+        // Tombol Tambah Baris
+        document.getElementById('btn-add-row').addEventListener('click', () => createRow());
+
+        // Inisiasi awal form dengan 5 baris kosong
+        function initForm() {
+            document.getElementById('table-items').innerHTML = '';
+            document.getElementById('main-form').reset();
+            for (let i = 0; i < 5; i++) createRow();
+        }
+        document.getElementById('btn-reset').addEventListener('click', initForm);
+
+        // 4. FUNGSI CRUD KE SERVER
+        function setStatus(text, show) {
+            const badge = document.getElementById('status-badge');
+            badge.innerText = text;
+            badge.style.display = show ? 'block' : 'none';
+        }
+
+        // SIMPAN DATA
+        document.getElementById('main-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Kumpulkan data barang
+            let items = [];
+            document.querySelectorAll('.row-item').forEach(row => {
+                items.push({
+                    desc: row.querySelector('.i-desc').value.toUpperCase(),
+                    qty: row.querySelector('.i-qty').value,
+                    unit: row.querySelector('.i-unit').value,
+                    remark: row.querySelector('.i-rem').value.toUpperCase()
+                });
+            });
+
+            const payload = {
+                action: 'save',
+                data: {
+                    ID_PR: document.getElementById('id_pr').value.toUpperCase(),
+                    TGL_REQUEST: document.getElementById('tgl_request').value,
+                    TGL_BUTUH: document.getElementById('tgl_butuh').value,
+                    DEPARTEMEN: document.getElementById('departemen').value.toUpperCase(),
+                    DATA_BARANG: JSON.stringify(items)
+                }
+            };
+
+            setStatus('Menyimpan...', true);
+            try {
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                alert("Data berhasil disimpan!");
+                initForm();
+                setActiveTab('history');
+                fetchHistory(); // refresh riwayat
+            } catch (err) {
+                alert("Gagal terhubung ke server Google.");
+            } finally {
+                setStatus('', false);
+            }
+        });
+
+        // AMBIL DATA
+        async function fetchHistory() {
+            const tbody = document.getElementById('table-history');
+            tbody.innerHTML = '<tr><td colspan="3" class="py-8 text-center text-slate-400 animate-pulse font-medium">Mengambil data...</td></tr>';
+
+            setStatus('Loading...', true);
+            try {
+                const res = await fetch(APPS_SCRIPT_URL);
+                const json = await res.json();
+                dbRiwayat = json.data || [];
+                renderHistory();
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="3" class="py-8 text-center text-red-500 font-medium">Gagal memuat riwayat.</td></tr>';
+            } finally {
+                setStatus('', false);
+            }
+        }
+        document.getElementById('btn-refresh').addEventListener('click', fetchHistory);
+
+        // TAMPILKAN TABEL RIWAYAT
+        function renderHistory() {
+            const tbody = document.getElementById('table-history');
+            tbody.innerHTML = '';
+
+            if (dbRiwayat.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="py-8 text-center text-slate-400">Tidak ada data.</td></tr>';
+                return;
+            }
+
+            dbRiwayat.forEach(row => {
+                let itemsHTML = '';
+                try {
+                    const arr = JSON.parse(row.DATA_BARANG);
+                    arr.slice(0, 3).forEach(i => {
+                        itemsHTML += `<div class="py-1 border-b border-slate-100 last:border-0 text-xs text-slate-600"><span class="font-bold text-slate-800">${i.qty} ${i.unit}</span> - ${i.desc}</div>`;
+                    });
+                    if (arr.length > 3) itemsHTML += `<div class="text-xs text-pink-500 font-bold mt-1">+ ${arr.length - 3} item lagi</div>`;
+                } catch (e) { itemsHTML = '<span class="text-xs text-slate-400">Error parsing data</span>'; }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="py-4 px-4 align-top">
+                        <div class="font-bold text-slate-800">${row.ID_PR}</div>
+                        <div class="text-[10px] text-slate-500 mt-1 uppercase">${row.DEPARTEMEN}</div>
+                    </td>
+                    <td class="py-4 px-4 align-top bg-slate-50/50">${itemsHTML}</td>
+                    <td class="py-4 px-4 align-top text-center space-y-2">
+                        <button class="w-full py-1.5 text-[11px] font-bold bg-pink-500 text-white rounded hover:bg-pink-600" onclick="printData('${row.ID_PR}')">CETAK</button>
+                        <button class="w-full py-1.5 text-[11px] font-bold bg-slate-100 text-red-500 rounded hover:bg-red-100" onclick="deleteData('${row.ID_PR}')">HAPUS</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // HAPUS DATA
+        async function deleteData(id) {
+            if (!confirm(`Yakin ingin menghapus PR ${id}?`)) return;
+            setStatus('Menghapus...', true);
+            try {
+                await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', data: { ID_PR: id } }) });
+                fetchHistory();
+            } catch (e) {
+                alert("Gagal menghapus.");
+            } finally { setStatus('', false); }
+        }
+
+        // 5. FUNGSI CETAK (AMBUNGSAN - BEBAS ERROR STRING)
+        function printData(id) {
+            const data = dbRiwayat.find(d => d.ID_PR === id);
+            if (!data) return alert("Data tidak ditemukan di memory.");
+
+            // 1. Isi Data ke DOM Tersembunyi
+            document.getElementById('print-dept').innerText = data.DEPARTEMEN;
+            document.getElementById('print-id').innerText = data.ID_PR;
+            document.getElementById('print-tgl-req').innerText = data.TGL_REQUEST;
+            document.getElementById('print-tgl-bth').innerText = data.TGL_BUTUH;
+
+            const tbody = document.getElementById('print-items');
+            tbody.innerHTML = ''; // Kosongkan dulu
+
+            try {
+                const itemsArr = JSON.parse(data.DATA_BARANG);
+                itemsArr.forEach((item, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="col-no">${index + 1}</td>
+                        <td>${item.desc}</td>
+                        <td class="col-qty">${item.qty}</td>
+                        <td class="col-unit">${item.unit}</td>
+                        <td class="col-rem">${item.remark}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5">Gagal membaca data barang.</td></tr>';
+            }
+
+            // 2. Panggil fungsi Print bawaan browser
+            window.print();
+        }
+
+        // Jalankan saat pertama buka
+        initForm();
+    </script>
+</body>
+
+</html>
