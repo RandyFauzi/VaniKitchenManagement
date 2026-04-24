@@ -621,6 +621,18 @@
             </form>
         </div>
     </div>
+    <!-- WELCOME POPUP MODAL -->
+    <div id="modal-welcome" class="modal-base fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div onclick="closeWelcomeModal()" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+        <div class="modal-card relative w-full max-w-sm bg-pink-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col p-8 text-center border-4 border-pink-100">
+            <div class="text-6xl mb-4 animate-bounce">💖</div>
+            <h2 class="text-xl font-black text-pink-600 mb-4">Hai Mimiy!</h2>
+            <p id="welcome-message-text" class="text-slate-700 font-bold mb-8 leading-relaxed text-[15px]"></p>
+            <button type="button" onclick="closeWelcomeModal()" class="w-full bg-gradient-to-r from-pink-400 to-rose-400 text-white font-black py-4 rounded-2xl shadow-lg hover:from-pink-500 hover:to-rose-500 transition-all text-base transform hover:-translate-y-1">
+                Iya Sayang, Makasih! 😘
+            </button>
+        </div>
+    </div>
 
     <!-- SCRIPT APLIKASI UTAMA -->
     <script>
@@ -1466,6 +1478,36 @@
         
         // ================== INIT ==================
 
+        function initWelcomePopup() {
+            const messages = [
+                "Semangat yaa Mimiykuu sayangg kerjanyaaa. Love youuuU!!!! ❤️",
+                "Jangan lupa minum air yaa sayangkuuu, semangat masak-masaknya hari ini! 🥰",
+                "Haii cantikkk, semangat yaa urusin dapurnya hari ini. I'm so proud of you! 💖",
+                "Semangat kerjanya Mimiy sayang, pulangnya aku tunggu yaa. Love you so much! 🌸",
+                "Capek dikit nggak apa-apa yaa sayang, yang penting berkah. Semangat terus Mimiykuu! ✨"
+            ];
+            const COOLDOWN_TIME = 3 * 60 * 60 * 1000; // 3 hours in ms
+            const lastTime = localStorage.getItem('welcome_popup_time');
+            const now = Date.now();
+
+            if (!lastTime || (now - lastTime) > COOLDOWN_TIME) {
+                const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+                document.getElementById('welcome-message-text').innerText = randomMsg;
+                
+                setTimeout(() => {
+                    const modal = document.getElementById('modal-welcome');
+                    if(modal) modal.classList.add('modal-open');
+                }, 1000); // Wait 1s after load for smooth entrance
+
+                localStorage.setItem('welcome_popup_time', now.toString());
+            }
+        }
+
+        function closeWelcomeModal() {
+            const modal = document.getElementById('modal-welcome');
+            if(modal) modal.classList.remove('modal-open');
+        }
+
         function showLoading(text = "Memproses Data...") {
             document.getElementById('loading-text').innerText = text;
             const overlay = document.getElementById('loading-overlay');
@@ -1490,6 +1532,7 @@
         initDailyForm();
         fetchStockData();
         fetchHistory(); // Fetches both PR and Daily History
+        initWelcomePopup();
 
     </script>
 </body>
