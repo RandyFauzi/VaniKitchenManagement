@@ -7,85 +7,559 @@
     <title>Vani Kitchen Management</title>
     <link rel="icon" type="image/webp" href="logo-vanikithcen.webp">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
-        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        body { -webkit-tap-highlight-color: transparent; }
-
-        .app-container { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .main-scroll { flex: 1; overflow-y: auto; padding-top: 5rem; padding-bottom: 5rem; }
-
-        /* MODAL ANIMASI */
-        .modal-base { transition: opacity 0.25s ease; opacity: 0; pointer-events: none; }
-        .modal-base.modal-open { opacity: 1; pointer-events: all; z-index: 100; }
-        .modal-base.modal-open .modal-card { transform: translateY(0) scale(1); opacity: 1; }
-        .modal-card { transform: translateY(32px) scale(0.96); opacity: 0; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease; }
-
-        /* TOAST */
-        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; width: max-content; max-width: calc(100vw - 32px); }
-        .toast { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08); font-size: 14px; font-weight: 600; pointer-events: all; min-width: 260px; max-width: 360px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-        .toast.toast-out { animation: toastOut 0.3s ease forwards; }
-        .toast-success { background: white; color: #15803d; border-left: 4px solid #22c55e; }
-        .toast-error { background: white; color: #dc2626; border-left: 4px solid #ef4444; }
-        .toast-warning { background: white; color: #d97706; border-left: 4px solid #f59e0b; }
-        .toast-info { background: white; color: #0369a1; border-left: 4px solid #38bdf8; }
-        .toast-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .toast-success .toast-icon { background: #dcfce7; }
-        .toast-error .toast-icon { background: #fee2e2; }
-        .toast-warning .toast-icon { background: #fef3c7; }
-        .toast-info .toast-icon { background: #e0f2fe; }
-
-        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px) scale(0.92); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes toastOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(-12px) scale(0.94); } }
-
-        /* TAB UI */
-        .tab-btn { border-bottom: 2px solid transparent; color: #64748b; font-weight: 600; padding: 10px 16px; transition: all 0.2s; }
-        .tab-btn.active { border-bottom: 2px solid #ec4899; color: #db2777; font-weight: 800; }
-
-        /* PRINT STYLES */
-        #print-pr-section, #print-stock-section, #print-daily-section { display: none; }
-        @media print {
-            body { background: white; margin: 0; padding: 0; }
-            .app-container { display: none !important; }
-            .is-printing { display: block !important; padding: 20px; color: black; }
-            @page { margin: 0; }
-
-            /* PR Styles */
-            #print-pr-section.is-printing { font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.5; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 25px; }
-            .print-table th, .print-table td { border-bottom: 1px dashed #000; padding: 10px 4px; text-align: left; }
-            .print-header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 12px; margin-bottom: 20px; }
-            .print-info { margin-bottom: 20px; }
-
-            /* Pink Theme Report Styles (Stok & Daily) */
-            .pink-report-wrapper { font-family: 'Quicksand', 'Nunito', 'Segoe UI', sans-serif; font-size: 11px; color: #475569; padding: 5mm; background-color: #fffafb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-radius: 16px; border: 2px dashed #fbcfe8; box-sizing: border-box; }
-            .pink-report-wrapper table { border-collapse: separate; border-spacing: 0; width: 100%; margin-bottom: 15px; border: 1px solid #fce7f3; border-radius: 8px; overflow: hidden; }
-            .pink-report-wrapper th, .pink-report-wrapper td { border: 1px solid #fce7f3; border-bottom: 1px dashed #fce7f3; padding: 6px 8px; }
-            .pink-report-wrapper th { background-color: #fdf2f8 !important; color: #be185d !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-            .pink-report-wrapper tr:nth-child(even) td { background-color: #fffafb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .pink-signature-box { text-align: center; width: 180px; background-color: #fdf2f8 !important; padding: 10px; border-radius: 12px; border: 1.5px dashed #fbcfe8; -webkit-print-color-adjust: exact; margin-left: auto;}
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
 
-        
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f472b6;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .app-container {
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        /* MODAL ANIMASI */
+        .modal-base {
+            transition: opacity 0.25s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .modal-base.modal-open {
+            opacity: 1;
+            pointer-events: all;
+            z-index: 100;
+        }
+
+        .modal-base.modal-open .modal-card {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .modal-card {
+            transform: translateY(32px) scale(0.96);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+        }
+
+        /* TOAST */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            width: max-content;
+            max-width: calc(100vw - 32px);
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            font-size: 14px;
+            font-weight: 600;
+            pointer-events: all;
+            min-width: 260px;
+            max-width: 360px;
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .toast.toast-out {
+            animation: toastOut 0.3s ease forwards;
+        }
+
+        .toast-success {
+            background: white;
+            color: #15803d;
+            border-left: 4px solid #22c55e;
+        }
+
+        .toast-error {
+            background: white;
+            color: #dc2626;
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast-warning {
+            background: white;
+            color: #d97706;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .toast-info {
+            background: white;
+            color: #0369a1;
+            border-left: 4px solid #38bdf8;
+        }
+
+        .toast-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon {
+            background: #dcfce7;
+        }
+
+        .toast-error .toast-icon {
+            background: #fee2e2;
+        }
+
+        .toast-warning .toast-icon {
+            background: #fef3c7;
+        }
+
+        .toast-info .toast-icon {
+            background: #e0f2fe;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.92);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-12px) scale(0.94);
+            }
+        }
+
+        /* TAB UI */
+        .tab-btn {
+            border-bottom: 2px solid transparent;
+            color: #64748b;
+            font-weight: 600;
+            padding: 10px 16px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            border-bottom: 2px solid #ec4899;
+            color: #db2777;
+            font-weight: 800;
+        }
+
+        /* PRINT STYLES */
+        #print-pr-section,
+        #print-stock-section,
+        #print-daily-section {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+                padding: 0;
+            }
+
+            .app-container {
+                display: none !important;
+            }
+
+            .is-printing {
+                display: block !important;
+                padding: 20px;
+                color: black;
+            }
+
+            @page {
+                margin: 0;
+            }
+
+            /* PR Styles */
+            #print-pr-section.is-printing {
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 25px;
+            }
+
+            .print-table th,
+            .print-table td {
+                border-bottom: 1px dashed #000;
+                padding: 10px 4px;
+                text-align: left;
+            }
+
+            .print-header {
+                text-align: center;
+                border-bottom: 2px dashed #000;
+                padding-bottom: 12px;
+                margin-bottom: 20px;
+            }
+
+            .print-info {
+                margin-bottom: 20px;
+            }
+
+            /* Pink Theme Report Styles (Stok & Daily) */
+            .pink-report-wrapper {
+                font-family: 'Quicksand', 'Nunito', 'Segoe UI', sans-serif;
+                font-size: 11px;
+                color: #475569;
+                padding: 5mm;
+                background-color: #fffafb !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                border-radius: 16px;
+                border: 2px dashed #fbcfe8;
+                box-sizing: border-box;
+            }
+
+            .pink-report-wrapper table {
+                border-collapse: separate;
+                border-spacing: 0;
+                width: 100%;
+                margin-bottom: 15px;
+                border: 1px solid #fce7f3;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .pink-report-wrapper th,
+            .pink-report-wrapper td {
+                border: 1px solid #fce7f3;
+                border-bottom: 1px dashed #fce7f3;
+                padding: 6px 8px;
+            }
+
+            .pink-report-wrapper th {
+                background-color: #fdf2f8 !important;
+                color: #be185d !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .pink-report-wrapper tr:nth-child(even) td {
+                background-color: #fffafb !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .pink-signature-box {
+                text-align: center;
+                width: 180px;
+                background-color: #fdf2f8 !important;
+                padding: 10px;
+                border-radius: 12px;
+                border: 1.5px dashed #fbcfe8;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                margin-left: auto;
+            }
+
+            /* Extracted Inline Styles for Print */
+            /* PR Multi Signatures */
+            .pr-end-req {
+                text-align: center;
+                margin-top: 40px;
+                margin-bottom: 40px;
+                font-style: italic;
+            }
+
+            .pr-end-req-line {
+                border-top: 2px dashed #000;
+                margin-top: 10px;
+            }
+
+            .pr-sig-row {
+                display: flex;
+                justify-content: space-between;
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            .pr-sig-col {
+                width: 30%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            .pr-sig-img {
+                height: 60px;
+                object-fit: contain;
+                margin-bottom: 5px;
+                mix-blend-mode: multiply;
+            }
+
+            .pr-sig-box-btm {
+                border-top: 1px dashed #000;
+                width: 100%;
+                max-width: 180px;
+                padding-top: 5px;
+                font-weight: 500;
+                line-height: 1.3;
+            }
+
+            .stk-header {
+                text-align: center;
+                border-bottom: 2px dashed #fbcfe8;
+                padding-bottom: 10px;
+                margin-bottom: 10px;
+            }
+
+            .stk-title {
+                font-size: 18px;
+                font-weight: 900;
+                margin: 0;
+                color: #db2777;
+            }
+
+            .stk-time {
+                margin: 6px 0 0 0;
+                font-size: 14px;
+                font-weight: 800;
+                color: #f472b6;
+                letter-spacing: 0.5px;
+            }
+
+            .stk-th-no {
+                width: 30px;
+                text-align: center;
+            }
+
+            .stk-th-nama {
+                text-align: left;
+            }
+
+            .stk-th-sisa,
+            .stk-th-status {
+                width: 70px;
+                text-align: center;
+            }
+
+            .pink-sig-img {
+                height: 40px;
+                object-fit: contain;
+                margin: 0 auto 5px auto;
+                mix-blend-mode: multiply;
+            }
+
+            .stk-sig-lbl {
+                margin-bottom: 5px;
+                font-size: 9px;
+                color: #be185d;
+                font-weight: 800;
+            }
+
+            .stk-sig-name {
+                font-weight: 800;
+                font-size: 12px;
+                color: #db2777;
+            }
+
+            .dl-header {
+                text-align: center;
+                border-bottom: 2px dashed #fbcfe8;
+                padding-bottom: 15px;
+                margin-bottom: 15px;
+            }
+
+            .dl-title {
+                font-size: 20px;
+                font-weight: 900;
+                margin: 0;
+                color: #db2777;
+            }
+
+            .dl-time {
+                margin: 6px 0 0 0;
+                font-size: 14px;
+                font-weight: 800;
+                color: #f472b6;
+                letter-spacing: 0.5px;
+            }
+
+            .dl-info {
+                margin-bottom: 15px;
+                font-size: 12px;
+                color: #475569;
+            }
+
+            .dl-info-flex {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+            }
+
+            .dl-shift-txt {
+                color: #db2777;
+                font-weight: bold;
+            }
+
+            .dl-sec-title {
+                font-weight: 800;
+                color: #be185d;
+                margin-bottom: 5px;
+            }
+
+            .dl-table1 {
+                margin-bottom: 20px;
+            }
+
+            .dl-th-no {
+                width: 40px;
+                text-align: center;
+            }
+
+            .dl-th-nama {
+                text-align: left;
+            }
+
+            .dl-th-porsi {
+                width: 80px;
+                text-align: center;
+            }
+
+            .dl-sig-box {
+                margin-top: 20px;
+            }
+
+            .dl-sig-lbl {
+                margin-bottom: 5px;
+                font-size: 10px;
+                color: #be185d;
+                font-weight: 800;
+            }
+
+            .dl-sig-name {
+                font-weight: 800;
+                font-size: 13px;
+                color: #db2777;
+            }
+        }
+
+
         /* iOS Toggle Switch */
-        .toggle-checkbox:checked { right: 0; border-color: #ec4899; }
-        .toggle-checkbox:checked + .toggle-label { background-color: #ec4899; }
-        .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
-        .toggle-label { width: 3rem; height: 1.5rem; background-color: #e2e8f0; transition: all 0.3s; border-radius: 9999px; }
-        
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #ec4899;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #ec4899;
+        }
+
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .toggle-label {
+            width: 3rem;
+            height: 1.5rem;
+            background-color: #e2e8f0;
+            transition: all 0.3s;
+            border-radius: 9999px;
+        }
+
         /* Recipe Cards */
-        .recipe-card { transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
-        .recipe-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .glass-btn { background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .recipe-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .glass-btn {
+            background: rgba(255, 255, 255, 0.25);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
 
         /* CUSTOM RADIO PILL */
-        .radio-pill input:checked + div { background-color: #ec4899; color: white; border-color: #ec4899; box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.3); }
-        .radio-pill input:focus + div { box-shadow: 0 0 0 2px #fbcfe8; }
+        .radio-pill input:checked+div {
+            background-color: #ec4899;
+            color: white;
+            border-color: #ec4899;
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.3);
+        }
+
+        .radio-pill input:focus+div {
+            box-shadow: 0 0 0 2px #fbcfe8;
+        }
     </style>
 </head>
 
@@ -93,7 +567,8 @@
     <div id="toast-container"></div>
 
     <!-- FULLSCREEN LOADING OVERLAY -->
-    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] hidden flex-col items-center justify-center transition-opacity duration-300">
+    <div id="loading-overlay"
+        class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[9999] hidden flex-col items-center justify-center transition-opacity duration-300">
         <div class="relative flex items-center justify-center mb-6">
             <div class="w-20 h-20 border-4 border-pink-100 border-t-pink-500 rounded-full animate-spin shadow-lg"></div>
             <div class="absolute w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
@@ -101,17 +576,20 @@
             </div>
         </div>
         <h3 id="loading-text" class="text-xl font-bold text-slate-700 tracking-tight">Memproses Data...</h3>
-        <p class="text-sm text-slate-400 mt-2 font-medium animate-pulse">Mohon tunggu sebentar, jangan tutup halaman ini.</p>
+        <p class="text-sm text-slate-400 mt-2 font-medium animate-pulse">Mohon tunggu sebentar, jangan tutup halaman
+            ini.</p>
     </div>
 
     <div class="app-container">
         <!-- HEADER -->
-        <header class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-50">
+        <header
+            class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-50">
             <div class="flex items-center">
                 <img src="logo-vanikithcen.webp" alt="Logo Vani Kitchen" class="w-9 h-9 object-contain mr-2.5">
                 <h1 class="text-lg font-bold tracking-tight text-slate-800">Vani Kitchen</h1>
             </div>
-            <div id="status-badge" class="hidden px-3 py-1 text-[10px] font-bold rounded-full bg-pink-100 text-pink-600 animate-pulse uppercase tracking-wider">
+            <div id="status-badge"
+                class="hidden px-3 py-1 text-[10px] font-bold rounded-full bg-pink-100 text-pink-600 animate-pulse uppercase tracking-wider">
                 Status...
             </div>
         </header>
@@ -120,38 +598,47 @@
         <div class="main-scroll">
             <main class="max-w-6xl mx-auto px-4 lg:px-8">
                 <header class="h-12 flex items-center justify-center mb-4">
-                    <h2 id="header-title" class="text-base lg:text-lg font-bold text-slate-700">Form Purchase Request</h2>
+                    <h2 id="header-title" class="text-base lg:text-lg font-bold text-slate-700">Form Purchase Request
+                    </h2>
                 </header>
 
                 <!-- VIEW 1: FORM PR -->
                 <div id="view-form" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <form id="main-form">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 mb-6">
+                        <div
+                            class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100 mb-6">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 mb-1">NO. PR</label>
-                                <input type="text" id="id_pr" required placeholder="DPR-01" title="Nomor PR" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none uppercase font-semibold text-sm">
+                                <input type="text" id="id_pr" required placeholder="DPR-01" title="Nomor PR"
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none uppercase font-semibold text-sm">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 mb-1">TGL REQUEST</label>
-                                <input type="date" id="tgl_request" required title="Tanggal Request" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none font-semibold text-sm">
+                                <input type="date" id="tgl_request" required title="Tanggal Request"
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none font-semibold text-sm">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 mb-1">TGL BUTUH</label>
-                                <input type="date" id="tgl_butuh" required title="Tanggal Butuh" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none font-semibold text-sm text-pink-600">
+                                <input type="date" id="tgl_butuh" required title="Tanggal Butuh"
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none font-semibold text-sm text-pink-600">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 mb-1">DEPARTEMEN</label>
-                                <input type="text" id="departemen" required value="F&B KITCHEN" title="Departemen" class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none uppercase font-semibold text-sm">
+                                <input type="text" id="departemen" required value="F&B KITCHEN" title="Departemen"
+                                    class="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-pink-200 outline-none uppercase font-semibold text-sm">
                             </div>
                         </div>
                         <div class="mb-6">
                             <div class="flex justify-between items-end mb-3">
                                 <h3 class="text-sm font-bold text-slate-700">DAFTAR BARANG</h3>
-                                <button type="button" id="btn-add-row" class="text-xs font-semibold bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition">+ Tambah Baris</button>
+                                <button type="button" id="btn-add-row"
+                                    class="text-xs font-semibold bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition">+
+                                    Tambah Baris</button>
                             </div>
                             <div class="border border-slate-200 rounded-xl overflow-x-auto bg-white">
                                 <table class="w-full text-left min-w-[700px]">
-                                    <thead class="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase">
+                                    <thead
+                                        class="bg-slate-50 border-b border-slate-200 text-[10px] text-slate-500 font-bold uppercase">
                                         <tr>
                                             <th class="py-3 px-4 w-12 text-center">NO</th>
                                             <th class="py-3 px-4">DESCRIPTION</th>
@@ -166,8 +653,11 @@
                             </div>
                         </div>
                         <div class="flex gap-3">
-                            <button type="submit" class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm shadow-md transition">Simpan Dokumen PR</button>
-                            <button type="button" onclick="initFormPR()" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-600 font-semibold py-2.5 px-6 rounded-xl text-sm transition">Kosongkan</button>
+                            <button type="submit"
+                                class="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2.5 px-6 rounded-xl text-sm shadow-md transition">Simpan
+                                Dokumen PR</button>
+                            <button type="button" onclick="initFormPR()"
+                                class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-600 font-semibold py-2.5 px-6 rounded-xl text-sm transition">Kosongkan</button>
                         </div>
                     </form>
                 </div>
@@ -175,25 +665,32 @@
                 <!-- VIEW 2: FORM DAILY REPORT -->
                 <div id="view-daily" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                     <form id="daily-form">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 p-4 bg-pink-50 rounded-xl border border-pink-100">
+                        <div
+                            class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 p-4 bg-pink-50 rounded-xl border border-pink-100">
                             <div>
                                 <label class="block text-[10px] font-bold text-pink-500 mb-1">ID LAPORAN</label>
-                                <input type="text" id="daily_id" readonly title="ID Laporan" placeholder="ID Laporan" class="w-full px-4 py-2 bg-pink-100/50 border border-pink-200 rounded-xl font-bold text-pink-700 text-sm outline-none cursor-not-allowed">
+                                <input type="text" id="daily_id" readonly title="ID Laporan" placeholder="ID Laporan"
+                                    class="w-full px-4 py-2 bg-pink-100/50 border border-pink-200 rounded-xl font-bold text-pink-700 text-sm outline-none cursor-not-allowed">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-pink-500 mb-1">TANGGAL</label>
-                                <input type="date" id="daily_tanggal" readonly title="Tanggal Laporan" class="w-full px-4 py-2 bg-white border border-pink-200 rounded-xl text-slate-700 font-semibold text-sm outline-none cursor-not-allowed">
+                                <input type="date" id="daily_tanggal" readonly title="Tanggal Laporan"
+                                    class="w-full px-4 py-2 bg-white border border-pink-200 rounded-xl text-slate-700 font-semibold text-sm outline-none cursor-not-allowed">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-pink-500 mb-2">PILIH SHIFT</label>
                                 <div class="flex gap-2">
                                     <label class="radio-pill flex-1 cursor-pointer">
                                         <input type="radio" name="daily_shift" value="Shift 1" class="hidden" checked>
-                                        <div class="text-center py-2 px-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-500 transition-all">Shift 1</div>
+                                        <div
+                                            class="text-center py-2 px-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-500 transition-all">
+                                            Shift 1</div>
                                     </label>
                                     <label class="radio-pill flex-1 cursor-pointer">
                                         <input type="radio" name="daily_shift" value="Shift 2" class="hidden">
-                                        <div class="text-center py-2 px-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-500 transition-all">Shift 2</div>
+                                        <div
+                                            class="text-center py-2 px-3 border border-slate-200 rounded-xl text-sm font-bold text-slate-500 transition-all">
+                                            Shift 2</div>
                                     </label>
                                 </div>
                             </div>
@@ -204,16 +701,21 @@
                             <div class="flex justify-between items-center mb-4">
                                 <div>
                                     <h3 class="text-base font-bold text-slate-800">Menu Yang Dimasak</h3>
-                                    <p class="text-[11px] text-slate-500">Pilih menu dan masukkan jumlah porsi yang berhasil dimasak.</p>
+                                    <p class="text-[11px] text-slate-500">Pilih menu dan masukkan jumlah porsi yang
+                                        berhasil dimasak.</p>
                                 </div>
                             </div>
-                            
+
                             <div id="daily-menu-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                                 <!-- Selected Menus appear here -->
                             </div>
 
-                            <button type="button" onclick="openMenuPickerModal()" class="w-full border-2 border-dashed border-pink-300 bg-pink-50 text-pink-600 hover:bg-pink-100 hover:border-pink-400 font-bold py-3.5 rounded-xl transition flex justify-center items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <button type="button" onclick="openMenuPickerModal()"
+                                class="w-full border-2 border-dashed border-pink-300 bg-pink-50 text-pink-600 hover:bg-pink-100 hover:border-pink-400 font-bold py-3.5 rounded-xl transition flex justify-center items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
                                 Pilih Menu Yang Dimasak
                             </button>
                         </div>
@@ -223,9 +725,12 @@
                             <div class="flex justify-between items-end mb-4">
                                 <div>
                                     <h3 class="text-base font-bold text-slate-800">Pekerjaan Ekstra/Lainnya</h3>
-                                    <p class="text-[11px] text-slate-500">Tuliskan kegiatan operasional dapur selain memasak.</p>
+                                    <p class="text-[11px] text-slate-500">Tuliskan kegiatan operasional dapur selain
+                                        memasak.</p>
                                 </div>
-                                <button type="button" onclick="addPekerjaanRow()" class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition">+ Tambah</button>
+                                <button type="button" onclick="addPekerjaanRow()"
+                                    class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-200 transition">+
+                                    Tambah</button>
                             </div>
                             <div id="pekerjaan-container" class="space-y-2">
                                 <!-- Pekerjaan rows -->
@@ -233,8 +738,12 @@
                         </div>
 
                         <div class="flex gap-3">
-                            <button type="submit" class="flex-1 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition text-base flex justify-center items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <button type="submit"
+                                class="flex-1 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition text-base flex justify-center items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
                                 Simpan Laporan Harian
                             </button>
                         </div>
@@ -245,13 +754,17 @@
                 <div id="view-history" class="hidden">
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                         <div class="flex border-b border-slate-200 bg-slate-50/50">
-                            <button id="tab-hist-pr" onclick="switchHistoryTab('pr')" class="tab-btn flex-1 text-sm active">Riwayat PR</button>
-                            <button id="tab-hist-daily" onclick="switchHistoryTab('daily')" class="tab-btn flex-1 text-sm">Laporan Harian</button>
+                            <button id="tab-hist-pr" onclick="switchHistoryTab('pr')"
+                                class="tab-btn flex-1 text-sm active">Riwayat PR</button>
+                            <button id="tab-hist-daily" onclick="switchHistoryTab('daily')"
+                                class="tab-btn flex-1 text-sm">Laporan Harian</button>
                         </div>
                         <div class="p-6">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 id="hist-title" class="text-sm font-bold text-slate-700">DOKUMEN PURCHASE REQUEST</h3>
-                                <button onclick="fetchHistory()" class="text-pink-600 hover:bg-pink-50 text-xs font-bold flex items-center px-3 py-1.5 rounded-lg border border-pink-200 transition">
+                                <h3 id="hist-title" class="text-sm font-bold text-slate-700">DOKUMEN PURCHASE REQUEST
+                                </h3>
+                                <button onclick="fetchHistory()"
+                                    class="text-pink-600 hover:bg-pink-50 text-xs font-bold flex items-center px-3 py-1.5 rounded-lg border border-pink-200 transition">
                                     Refresh Data
                                 </button>
                             </div>
@@ -259,8 +772,13 @@
                             <!-- Table PR -->
                             <div id="wrap-hist-pr" class="overflow-x-auto border border-slate-200 rounded-xl">
                                 <table class="w-full text-left">
-                                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-bold">
-                                        <tr><th class="py-3 px-4">DOKUMEN INFO</th><th class="py-3 px-4 w-1/2">BARANG</th><th class="py-3 px-4 text-center w-32">AKSI</th></tr>
+                                    <thead
+                                        class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-bold">
+                                        <tr>
+                                            <th class="py-3 px-4">DOKUMEN INFO</th>
+                                            <th class="py-3 px-4 w-1/2">BARANG</th>
+                                            <th class="py-3 px-4 text-center w-32">AKSI</th>
+                                        </tr>
                                     </thead>
                                     <tbody id="table-history-pr" class="text-sm divide-y divide-slate-200"></tbody>
                                 </table>
@@ -269,8 +787,13 @@
                             <!-- Table Daily -->
                             <div id="wrap-hist-daily" class="hidden overflow-x-auto border border-slate-200 rounded-xl">
                                 <table class="w-full text-left">
-                                    <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-bold">
-                                        <tr><th class="py-3 px-4">INFO LAPORAN</th><th class="py-3 px-4 w-1/2">RINGKASAN</th><th class="py-3 px-4 text-center w-32">AKSI</th></tr>
+                                    <thead
+                                        class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase font-bold">
+                                        <tr>
+                                            <th class="py-3 px-4">INFO LAPORAN</th>
+                                            <th class="py-3 px-4 w-1/2">RINGKASAN</th>
+                                            <th class="py-3 px-4 text-center w-32">AKSI</th>
+                                        </tr>
                                     </thead>
                                     <tbody id="table-history-daily" class="text-sm divide-y divide-slate-200"></tbody>
                                 </table>
@@ -284,48 +807,82 @@
                     <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
                         <div class="mb-8">
                             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center">
-                                <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center mr-3">🍔</div>
+                                <div
+                                    class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center mr-3">
+                                    🍔</div>
                                 Kategori MAKANAN
                             </h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="stock-makanan-list"></div>
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center">
-                                <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center mr-3">🍟</div>
+                                <div
+                                    class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center mr-3">
+                                    🍟</div>
                                 Kategori SNACK
                             </h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="stock-snack-list"></div>
                         </div>
+                        <div class="mt-8">
+                            <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center mr-3">
+                                    🥬</div>
+                                Kategori BAHAN DAPUR
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="stock-bahan-list"></div>
+                        </div>
                         <div class="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-3">
-                            <button type="button" onclick="saveStockData()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center text-[15px]">Simpan Data Stok</button>
-                            <button type="button" onclick="openAddMenuModal()" class="w-full bg-white border-2 border-pink-400 hover:bg-pink-50 text-pink-600 font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center text-[15px]">Tambah Menu Baru</button>
-                            <button type="button" onclick="printStockData()" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center text-[15px]">Cetak Laporan Stok</button>
+                            <button type="button" onclick="saveStockData()"
+                                class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center text-[15px]">Simpan
+                                Data Stok</button>
+                            <button type="button" onclick="openAddMenuModal()"
+                                class="w-full bg-white border-2 border-pink-400 hover:bg-pink-50 text-pink-600 font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center text-[15px]">Tambah
+                                Menu Baru</button>
+                            <button type="button" onclick="printStockData()"
+                                class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center text-[15px]">Cetak
+                                Laporan Stok</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- VIEW 5: BUKU RESEP -->
                 <div id="view-resep" class="hidden space-y-6">
-                    <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 min-h-[60vh] flex flex-col">
+                    <div
+                        class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 min-h-[60vh] flex flex-col">
                         <div class="mb-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                             <div class="w-full sm:w-2/3 relative">
-                                <input type="text" id="search-resep" placeholder="Cari resep masakan..." class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-pink-300 transition text-sm font-bold text-slate-700" onkeyup="renderRecipes()">
-                                <svg class="w-5 h-5 absolute left-3 top-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <input type="text" id="search-resep" placeholder="Cari resep masakan..."
+                                    class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-pink-300 transition text-sm font-bold text-slate-700"
+                                    onkeyup="renderRecipes()">
+                                <svg class="w-5 h-5 absolute left-3 top-3.5 text-slate-400" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
                             </div>
-                            <div class="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 no-scrollbar" id="resep-filters">
-                                <button onclick="filterResep('Semua', this)" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-pink-500 text-white shadow-sm border border-transparent active-filter whitespace-nowrap">Semua</button>
-                                <button onclick="filterResep('Makanan', this)" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">Makanan</button>
-                                <button onclick="filterResep('Snack', this)" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">Snack</button>
+                            <div class="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 no-scrollbar"
+                                id="resep-filters">
+                                <button onclick="filterResep('Semua', this)"
+                                    class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-pink-500 text-white shadow-sm border border-transparent active-filter whitespace-nowrap">Semua</button>
+                                <button onclick="filterResep('Makanan', this)"
+                                    class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">Makanan</button>
+                                <button onclick="filterResep('Snack', this)"
+                                    class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 whitespace-nowrap">Snack</button>
                             </div>
                         </div>
-                        
+
                         <div id="resep-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 content-start mb-6">
                             <!-- Recipe Cards -->
                         </div>
-                        
+
                         <div class="mt-auto pt-4 border-t border-slate-100">
-                            <button type="button" onclick="openFormResep()" class="w-full bg-white border-2 border-pink-400 hover:bg-pink-50 text-pink-600 font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center text-[15px]">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <button type="button" onclick="openFormResep()"
+                                class="w-full bg-white border-2 border-pink-400 hover:bg-pink-50 text-pink-600 font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center text-[15px]">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
                                 Tambah Resep Baru
                             </button>
                         </div>
@@ -338,25 +895,47 @@
 
 
         <!-- BOTTOM NAVIGATION -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-between items-center h-16 z-50 px-2 sm:px-6 pb-2">
-            <button id="nav-form" class="flex-1 flex flex-col items-center justify-center space-y-1 text-pink-600 transition h-full touch-manipulation">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"></path></svg>
+        <nav
+            class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-between items-center h-16 z-50 px-2 sm:px-6 pb-2">
+            <button id="nav-form"
+                class="flex-1 flex flex-col items-center justify-center space-y-1 text-pink-600 transition h-full touch-manipulation">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"></path>
+                </svg>
                 <span class="text-[9px] font-bold uppercase tracking-wider">Buat PR</span>
             </button>
-            <button id="nav-daily" class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <button id="nav-daily"
+                class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                    </path>
+                </svg>
                 <span class="text-[9px] font-bold uppercase tracking-wider">Lapor Dapur</span>
             </button>
-            <button id="nav-history" class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+            <button id="nav-history"
+                class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                </svg>
                 <span class="text-[9px] font-bold uppercase tracking-wider">Riwayat</span>
             </button>
-            <button id="nav-stock" class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            <button id="nav-stock"
+                class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
                 <span class="text-[9px] font-bold uppercase tracking-wider">Stok</span>
             </button>
-            <button id="nav-resep" class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            <button id="nav-resep"
+                class="flex-1 flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-pink-600 transition h-full touch-manipulation">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                    </path>
+                </svg>
                 <span class="text-[9px] font-bold uppercase tracking-wider">Resep</span>
             </button>
         </nav>
@@ -368,8 +947,16 @@
         <div class="modal-card relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div class="bg-gradient-to-r from-pink-500 to-rose-400 px-6 pt-8 pb-12">
                 <div class="flex justify-between items-start">
-                    <div><p class="text-pink-100 text-sm font-medium mb-1">Stok Menu</p><h3 class="text-white text-2xl font-bold">Tambah Menu Baru</h3></div>
-                    <button onclick="closeAddMenuModal()" title="Tutup Modal" class="relative z-10 w-9 h-9 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                    <div>
+                        <p class="text-pink-100 text-sm font-medium mb-1">Stok Menu</p>
+                        <h3 class="text-white text-2xl font-bold">Tambah Menu Baru</h3>
+                    </div>
+                    <button onclick="closeAddMenuModal()" title="Tutup Modal"
+                        class="relative z-10 w-9 h-9 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition"><svg
+                            class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg></button>
                 </div>
                 <div class="absolute top-4 right-16 w-20 h-20 bg-white/10 rounded-full pointer-events-none"></div>
                 <div class="absolute top-0 right-4 w-32 h-32 bg-white/5 rounded-full pointer-events-none"></div>
@@ -378,23 +965,33 @@
                 <form id="form-tambah-menu" onsubmit="submitAddMenu(event)">
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Kategori</label>
-                        <select id="input-kategori-menu" required title="Kategori Menu" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none font-bold text-slate-700">
-                            <option value="makanan">Makanan</option><option value="snack">Snack</option>
+                        <select id="input-kategori-menu" required title="Kategori Menu"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none font-bold text-slate-700">
+                            <option value="makanan">Makanan</option>
+                            <option value="snack">Snack</option>
+                            <option value="bahan">Bahan Dapur</option>
                         </select>
                     </div>
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Nama Menu</label>
-                        <input type="text" id="input-nama-menu" required placeholder="Nama Menu" title="Nama Menu" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none">
+                        <input type="text" id="input-nama-menu" required placeholder="Nama Menu" title="Nama Menu"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none">
                     </div>
                     <div class="mb-6">
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Jumlah Stok Awal</label>
                         <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-2">
-                            <button type="button" onclick="adjustModalQty('input-jumlah-stok',-1)" class="w-11 h-11 bg-white border border-slate-100 rounded-xl font-bold flex justify-center items-center">-</button>
-                            <input type="number" id="input-jumlah-stok" required min="0" value="1" title="Jumlah Stok" placeholder="0" class="flex-1 text-center bg-transparent outline-none text-2xl font-bold text-slate-800 w-full">
-                            <button type="button" onclick="adjustModalQty('input-jumlah-stok',1)" class="w-11 h-11 bg-pink-500 text-white rounded-xl font-bold flex justify-center items-center">+</button>
+                            <button type="button" onclick="adjustModalQty('input-jumlah-stok',-1)"
+                                class="w-11 h-11 bg-white border border-slate-100 rounded-xl font-bold flex justify-center items-center">-</button>
+                            <input type="number" id="input-jumlah-stok" required min="0" value="1" title="Jumlah Stok"
+                                placeholder="0"
+                                class="flex-1 text-center bg-transparent outline-none text-2xl font-bold text-slate-800 w-full">
+                            <button type="button" onclick="adjustModalQty('input-jumlah-stok',1)"
+                                class="w-11 h-11 bg-pink-500 text-white rounded-xl font-bold flex justify-center items-center">+</button>
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold py-4 rounded-2xl shadow-lg transition text-[15px]">Tambahkan Menu</button>
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold py-4 rounded-2xl shadow-lg transition text-[15px]">Tambahkan
+                        Menu</button>
                 </form>
             </div>
         </div>
@@ -403,10 +1000,16 @@
     <!-- MODAL PILIH MENU DAILY -->
     <div id="modal-pilih-daily" class="modal-base fixed inset-0 flex items-end sm:items-center justify-center p-4">
         <div onclick="closeDailyMenuModal()" class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-        <div class="modal-card relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh] sm:h-[600px]">
+        <div
+            class="modal-card relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh] sm:h-[600px]">
             <div class="bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
                 <h3 class="text-slate-800 text-lg font-bold">Menu Terjual / Dimasak</h3>
-                <button onclick="closeDailyMenuModal()" title="Tutup" class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                <button onclick="closeDailyMenuModal()" title="Tutup"
+                    class="w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-500"><svg
+                        class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg></button>
             </div>
             <div class="p-6 overflow-y-auto flex-1 bg-slate-50/50">
                 <h4 class="font-bold text-pink-500 text-sm mb-3">MAKANAN</h4>
@@ -415,129 +1018,202 @@
                 <div id="daily-picker-snack" class="space-y-2"></div>
             </div>
             <div class="p-4 bg-white border-t border-slate-100 shrink-0">
-                <button type="button" onclick="applyDailyMenuSelection()" class="w-full bg-pink-500 text-white font-bold py-3.5 rounded-xl shadow-md text-sm">Terapkan Pilihan</button>
+                <button type="button" onclick="applyDailyMenuSelection()"
+                    class="w-full bg-pink-500 text-white font-bold py-3.5 rounded-xl shadow-md text-sm">Terapkan
+                    Pilihan</button>
             </div>
         </div>
     </div>
 
     <!-- PRINT: PR -->
     <div id="print-pr-section">
-        <div class="print-header"><h1>PURCHASE REQUEST</h1><p id="print-dept">DEPARTEMEN</p></div>
+        <div class="print-header">
+            <h1>PURCHASE REQUEST</h1>
+            <p id="print-dept">DEPARTEMEN</p>
+        </div>
         <div class="print-info">
             <div><b>NO PR :</b> <span id="print-id"></span></div>
             <div><b>TGL REQ:</b> <span id="print-tgl-req"></span></div>
             <div><b>TGL BTH:</b> <span id="print-tgl-bth"></span></div>
         </div>
         <table class="print-table">
-            <thead><tr><th class="w-8 text-center">NO</th><th>DESCRIPTION</th><th class="text-center">QTY</th><th class="text-center">UNIT</th><th class="text-right">REMARK</th></tr></thead>
+            <thead>
+                <tr>
+                    <th class="w-8 text-center">NO</th>
+                    <th>DESCRIPTION</th>
+                    <th class="text-center">QTY</th>
+                    <th class="text-center">UNIT</th>
+                    <th class="text-right">REMARK</th>
+                </tr>
+            </thead>
             <tbody id="print-items"></tbody>
         </table>
-        <div style="display: flex; justify-content: flex-end; margin-top: 40px;">
-            <div style="text-align: center; width: 200px;">
-                <p style="margin-bottom: 60px;">Dibuat Oleh,</p>
-                <p style="font-weight: bold; text-decoration: underline; text-underline-offset: 4px;">Oktivani Nurjanah</p>
+        <div class="pr-end-req">
+            <p>--- END OF REQUEST ---</p>
+            <div class="pr-end-req-line"></div>
+        </div>
+        <div class="pr-sig-row">
+            <div class="pr-sig-col">
+                <img src="https://i.imgur.com/cE7b4L4.png" alt="TTD" class="pr-sig-img">
+                <div class="pr-sig-box-btm">
+                    DIBUAT OLEH<br>OKTIVANI NURJANAH
+                </div>
+            </div>
+            <div class="pr-sig-col">
+                <div style="height: 65px;"></div>
+                <div class="pr-sig-box-btm">
+                    DIPERIKSA OLEH
+                </div>
+            </div>
+            <div class="pr-sig-col">
+                <div style="height: 65px;"></div>
+                <div class="pr-sig-box-btm">
+                    DISETUJUI OLEH
+                </div>
             </div>
         </div>
     </div>
 
     <!-- PRINT: STOK -->
     <div id="print-stock-section" class="pink-report-wrapper">
-        <div style="text-align: center; border-bottom: 2px dashed #fbcfe8; padding-bottom: 10px; margin-bottom: 10px;">
-            <h1 style="font-size: 18px; font-weight: 900; margin: 0; color: #db2777;">🌸 LAPORAN STOK MENU 🌸</h1>
-            <p id="print-stock-time" style="margin: 6px 0 0 0; font-size: 14px; font-weight: 800; color: #f472b6; letter-spacing: 0.5px;"></p>
+        <div class="stk-header">
+            <h1 class="stk-title">🌸 LAPORAN STOK MENU 🌸</h1>
+            <p id="print-stock-time" class="stk-time"></p>
         </div>
         <table>
-            <thead><tr><th style="width: 30px; text-align: center;">No</th><th style="text-align: left;">Nama Menu</th><th style="width: 70px; text-align: center;">Sisa Stok</th><th style="width: 70px; text-align: center;">Status</th></tr></thead>
+            <thead>
+                <tr>
+                    <th class="stk-th-no">No</th>
+                    <th class="stk-th-nama">Nama Menu</th>
+                    <th class="stk-th-sisa">Sisa Stok</th>
+                    <th class="stk-th-status">Status</th>
+                </tr>
+            </thead>
             <tbody id="print-stock-items"></tbody>
         </table>
         <div class="pink-signature-box">
-            <p style="margin-bottom: 35px; font-size: 9px; color: #be185d; font-weight: 800;">Diperiksa Oleh,</p>
-            <p style="font-weight: 800; font-size: 12px; color: #db2777;">OKTIVANI NURJANAH</p>
+            <p class="stk-sig-lbl">Diperiksa Oleh,</p>
+            <img src="https://i.imgur.com/cE7b4L4.png" alt="TTD" class="pink-sig-img">
+            <p class="stk-sig-name">OKTIVANI NURJANAH</p>
         </div>
     </div>
 
     <!-- PRINT: DAILY REPORT -->
     <div id="print-daily-section" class="pink-report-wrapper">
-        <div style="text-align: center; border-bottom: 2px dashed #fbcfe8; padding-bottom: 15px; margin-bottom: 15px;">
-            <h1 style="font-size: 20px; font-weight: 900; margin: 0; color: #db2777;">✨ DAILY KITCHEN REPORT ✨</h1>
-            <p id="print-daily-tgl" style="margin: 6px 0 0 0; font-size: 14px; font-weight: 800; color: #f472b6; letter-spacing: 0.5px;"></p>
+        <div class="dl-header">
+            <h1 class="dl-title">✨ DAILY KITCHEN REPORT ✨</h1>
+            <p id="print-daily-tgl" class="dl-time"></p>
         </div>
-        <div style="margin-bottom: 15px; font-size: 12px; color: #475569;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+        <div class="dl-info">
+            <div class="dl-info-flex">
                 <span><b>ID Laporan:</b> <span id="print-daily-id"></span></span>
-                <span><b>Shift:</b> <span id="print-daily-shift" style="color:#db2777; font-weight:bold;"></span></span>
+                <span><b>Shift:</b> <span id="print-daily-shift" class="dl-shift-txt"></span></span>
             </div>
         </div>
-        <div style="font-weight:800; color:#be185d; margin-bottom:5px;">📋 REKAP MENU DIMASAK</div>
-        <table style="margin-bottom:20px;">
-            <thead><tr><th style="width: 40px; text-align: center;">No</th><th style="text-align: left;">Nama Menu</th><th style="width: 80px; text-align: center;">Porsi</th></tr></thead>
+        <div class="dl-sec-title">📋 REKAP MENU DIMASAK</div>
+        <table class="dl-table1">
+            <thead>
+                <tr>
+                    <th class="dl-th-no">No</th>
+                    <th class="dl-th-nama">Nama Menu</th>
+                    <th class="dl-th-porsi">Porsi</th>
+                </tr>
+            </thead>
             <tbody id="print-daily-menu-items"></tbody>
         </table>
-        <div style="font-weight:800; color:#be185d; margin-bottom:5px;">🧹 PEKERJAAN EKSTRA/LAINNYA</div>
+        <div class="dl-sec-title">🧹 PEKERJAAN EKSTRA/LAINNYA</div>
         <table>
-            <thead><tr><th style="width: 40px; text-align: center;">No</th><th style="text-align: left;">Deskripsi Pekerjaan</th></tr></thead>
+            <thead>
+                <tr>
+                    <th class="dl-th-no">No</th>
+                    <th class="dl-th-nama">Deskripsi Pekerjaan</th>
+                </tr>
+            </thead>
             <tbody id="print-daily-job-items"></tbody>
         </table>
-        <div class="pink-signature-box" style="margin-top:20px;">
-            <p style="margin-bottom: 40px; font-size: 10px; color: #be185d; font-weight: 800;">Dibuat Oleh,</p>
-            <p style="font-weight: 800; font-size: 13px; color: #db2777;">VANI</p>
+        <div class="pink-signature-box dl-sig-box">
+            <p class="dl-sig-lbl">Dibuat Oleh,</p>
+            <img src="https://i.imgur.com/cE7b4L4.png" alt="TTD" class="pink-sig-img">
+            <p class="dl-sig-name">OKTIVANI NURJANAH</p>
         </div>
     </div>
 
-    
+
     <!-- VIEW DETAIL RESEP (FULLSCREEN) -->
     <div id="view-detail-resep" class="fixed inset-0 z-[100] bg-slate-100 overflow-y-auto hidden">
         <!-- Wrapper container to limit width on desktop -->
         <div class="w-full max-w-3xl mx-auto bg-white min-h-screen shadow-2xl relative">
             <div class="relative w-full h-[35vh] sm:h-[45vh] bg-slate-200">
-                <img id="dtl-img" src="" class="w-full h-full object-cover" alt="Resep" onerror="this.src='https://placehold.co/800x600/f8fafc/cbd5e1?text=Belum+Ada+Foto'">
-                <button onclick="closeDetailResep()" title="Kembali" class="absolute top-6 left-6 w-10 h-10 rounded-full flex justify-center items-center text-slate-700 bg-white/90 hover:bg-white shadow-md transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                <img id="dtl-img" src="" class="w-full h-full object-cover" alt="Resep"
+                    onerror="this.src='https://placehold.co/800x600/f8fafc/cbd5e1?text=Belum+Ada+Foto'">
+                <button onclick="closeDetailResep()" title="Kembali"
+                    class="absolute top-6 left-6 w-10 h-10 rounded-full flex justify-center items-center text-slate-700 bg-white/90 hover:bg-white shadow-md transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
                 </button>
             </div>
-            <div class="relative -mt-8 bg-white rounded-t-3xl min-h-[70vh] px-6 sm:px-10 pt-8 pb-24 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-            <div class="mb-6">
-                <span id="dtl-cat" class="text-[10px] font-bold tracking-widest text-pink-500 uppercase">Kategori</span>
-                <h2 id="dtl-nama" class="text-2xl font-black text-slate-800 mt-1 mb-2 leading-tight">Nama Menu</h2>
-                <p id="dtl-desc" class="text-sm text-slate-500 font-medium leading-relaxed">Deskripsi...</p>
-            </div>
-            
-            <div class="mb-8">
-                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <div class="w-6 h-6 rounded bg-pink-100 flex items-center justify-center text-pink-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></div>
-                    Bahan-Bahan
-                </h3>
-                <ul id="dtl-bahan" class="space-y-2 text-sm text-slate-700 font-medium"></ul>
-            </div>
+            <div
+                class="relative -mt-8 bg-white rounded-t-3xl min-h-[70vh] px-6 sm:px-10 pt-8 pb-24 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+                <div class="mb-6">
+                    <span id="dtl-cat"
+                        class="text-[10px] font-bold tracking-widest text-pink-500 uppercase">Kategori</span>
+                    <h2 id="dtl-nama" class="text-2xl font-black text-slate-800 mt-1 mb-2 leading-tight">Nama Menu</h2>
+                    <p id="dtl-desc" class="text-sm text-slate-500 font-medium leading-relaxed">Deskripsi...</p>
+                </div>
 
-            <div class="mb-8">
-                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <div class="w-6 h-6 rounded bg-pink-100 flex items-center justify-center text-pink-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
-                    Cara Memasak
-                </h3>
-                <div id="dtl-langkah" class="space-y-4"></div>
-            </div>
+                <div class="mb-8">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <div class="w-6 h-6 rounded bg-pink-100 flex items-center justify-center text-pink-500"><svg
+                                class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg></div>
+                        Bahan-Bahan
+                    </h3>
+                    <ul id="dtl-bahan" class="space-y-2 text-sm text-slate-700 font-medium"></ul>
+                </div>
 
-            <div id="dtl-notes-container" class="mb-8 p-4 bg-pink-50 rounded-2xl border border-pink-100">
-                <h4 class="text-xs font-bold text-pink-600 mb-2 uppercase tracking-wide">Notes / Tips</h4>
-                <p id="dtl-notes" class="text-sm text-slate-600 italic"></p>
-            </div>
+                <div class="mb-8">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <div class="w-6 h-6 rounded bg-pink-100 flex items-center justify-center text-pink-500"><svg
+                                class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg></div>
+                        Cara Memasak
+                    </h3>
+                    <div id="dtl-langkah" class="space-y-4"></div>
+                </div>
 
-            <div class="text-center mt-12 mb-8">
-                <p class="font-black text-slate-800 text-lg">Resep dibuat oleh Vani 💖</p>
-            </div>
+                <div id="dtl-notes-container" class="mb-8 p-4 bg-pink-50 rounded-2xl border border-pink-100">
+                    <h4 class="text-xs font-bold text-pink-600 mb-2 uppercase tracking-wide">Notes / Tips</h4>
+                    <p id="dtl-notes" class="text-sm text-slate-600 italic"></p>
+                </div>
 
-            <button onclick="openFormResep(currentResepId)" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-4 rounded-2xl shadow-sm transition text-base border border-slate-200">
-                ✏️ Edit Resep Ini
-            </button>
-        </div>
+                <div class="text-center mt-12 mb-8">
+                    <p class="font-black text-slate-800 text-lg">Resep dibuat oleh Vani 💖</p>
+                </div>
+
+                <button onclick="openFormResep(currentResepId)"
+                    class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-4 rounded-2xl shadow-sm transition text-base border border-slate-200">
+                    ✏️ Edit Resep Ini
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- VIEW FORM RESEP (FULLSCREEN) -->
     <div id="view-form-resep" class="fixed inset-0 z-[110] bg-white overflow-y-auto hidden">
-        <header class="sticky top-0 bg-white/90 backdrop-blur border-b border-slate-100 px-4 py-4 flex items-center justify-between z-10">
-            <button onclick="closeFormResep()" title="Tutup" class="text-slate-400 hover:text-slate-600 p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        <header
+            class="sticky top-0 bg-white/90 backdrop-blur border-b border-slate-100 px-4 py-4 flex items-center justify-between z-10">
+            <button onclick="closeFormResep()" title="Tutup" class="text-slate-400 hover:text-slate-600 p-2"><svg
+                    class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg></button>
             <h3 id="form-resep-title" class="font-bold text-slate-800 text-lg">Tambah Resep Baru</h3>
             <div class="w-10"></div>
         </header>
@@ -547,27 +1223,42 @@
                 <div class="space-y-5">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Nama Menu</label>
-                        <input type="text" id="r_nama" required title="Nama Menu" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-pink-300">
+                        <input type="text" id="r_nama" required title="Nama Menu"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-pink-300">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Kategori</label>
-                        <select id="r_kat" required title="Kategori Resep" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-pink-300">
-                            <option value="Makanan">Makanan</option><option value="Snack">Snack</option>
+                        <select id="r_kat" required title="Kategori Resep"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-pink-300">
+                            <option value="Makanan">Makanan</option>
+                            <option value="Snack">Snack</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Foto / Gambar Menu (Opsional)</label>
-                        
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Foto / Gambar Menu
+                            (Opsional)</label>
+
                         <div id="r_img_preview_container" class="hidden mb-3 relative w-32 h-32">
-                            <img id="r_img_preview" src="" class="w-full h-full object-cover rounded-xl border border-slate-200 shadow-sm">
-                            <button type="button" onclick="removeSelectedImage()" class="absolute -top-2 -right-2 bg-white text-red-500 border border-red-200 rounded-full w-7 h-7 flex items-center justify-center font-bold shadow-md hover:bg-red-50 hover:border-red-300 transition" title="Hapus Foto">X</button>
+                            <img id="r_img_preview" src="" alt="Pratinjau Foto"
+                                class="w-full h-full object-cover rounded-xl border border-slate-200 shadow-sm">
+                            <button type="button" onclick="removeSelectedImage()"
+                                class="absolute -top-2 -right-2 bg-white text-red-500 border border-red-200 rounded-full w-7 h-7 flex items-center justify-center font-bold shadow-md hover:bg-red-50 hover:border-red-300 transition"
+                                title="Hapus Foto">X</button>
                         </div>
 
                         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                            <label class="cursor-pointer bg-white hover:bg-slate-50 text-slate-600 font-bold py-2.5 px-4 rounded-xl border border-slate-200 shadow-sm transition-all text-sm flex items-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <label
+                                class="cursor-pointer bg-white hover:bg-slate-50 text-slate-600 font-bold py-2.5 px-4 rounded-xl border border-slate-200 shadow-sm transition-all text-sm flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z">
+                                    </path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
                                 Ambil / Pilih Foto
-                                <input type="file" id="r_file" accept="image/*" capture="environment" class="hidden" onchange="handleImageSelect(event)">
+                                <input type="file" id="r_file" accept="image/*" capture="environment" class="hidden"
+                                    onchange="handleImageSelect(event)">
                             </label>
                             <span id="r_file_name" class="text-[11px] text-slate-400 font-medium">Belum ada foto</span>
                         </div>
@@ -576,13 +1267,16 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Deskripsi Singkat</label>
-                        <textarea id="r_desc" rows="2" title="Deskripsi Resep" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-pink-300"></textarea>
+                        <textarea id="r_desc" rows="2" title="Deskripsi Resep"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-pink-300"></textarea>
                     </div>
-                    
+
                     <div class="pt-4 border-t border-slate-100">
                         <div class="flex justify-between items-center mb-3">
                             <label class="text-xs font-bold text-slate-400 uppercase">Bahan-Bahan</label>
-                            <button type="button" onclick="addBahanRow()" class="text-xs font-bold text-pink-500 bg-pink-50 px-3 py-1 rounded-lg">+ Tambah</button>
+                            <button type="button" onclick="addBahanRow()"
+                                class="text-xs font-bold text-pink-500 bg-pink-50 px-3 py-1 rounded-lg">+
+                                Tambah</button>
                         </div>
                         <div id="r_bahan_container" class="space-y-2"></div>
                     </div>
@@ -590,45 +1284,73 @@
                     <div class="pt-4 border-t border-slate-100">
                         <div class="flex justify-between items-center mb-3">
                             <label class="text-xs font-bold text-slate-400 uppercase">Langkah Memasak</label>
-                            <button type="button" onclick="addListRow('r_langkah')" class="text-xs font-bold text-pink-500 bg-pink-50 px-3 py-1 rounded-lg">+ Tambah</button>
+                            <button type="button" onclick="addListRow('r_langkah')"
+                                class="text-xs font-bold text-pink-500 bg-pink-50 px-3 py-1 rounded-lg">+
+                                Tambah</button>
                         </div>
                         <div id="r_langkah_container" class="space-y-2"></div>
                     </div>
 
                     <div class="pt-4 border-t border-slate-100">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Notes Tambahan (Opsional)</label>
-                        <textarea id="r_notes" rows="2" title="Notes Tambahan" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-pink-300"></textarea>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Notes Tambahan
+                            (Opsional)</label>
+                        <textarea id="r_notes" rows="2" title="Notes Tambahan"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-pink-300"></textarea>
                     </div>
 
                     <div class="pt-4 border-t border-slate-100">
-                        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div
+                            class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200">
                             <div>
                                 <h4 class="font-bold text-slate-700 text-sm">Masukkan ke Daftar Stok?</h4>
-                                <p class="text-[10px] text-slate-500 mt-0.5">Jika aktif, menu otomatis masuk ke manajemen stok.</p>
+                                <p class="text-[10px] text-slate-500 mt-0.5">Jika aktif, menu otomatis masuk ke
+                                    manajemen stok.</p>
                             </div>
-                            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
-                                <input type="checkbox" id="r_stock" title="Aktifkan Stok" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
-                                <label for="r_stock" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                            <div
+                                class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" id="r_stock" title="Aktifkan Stok"
+                                    class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
+                                <label for="r_stock"
+                                    class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-8 flex flex-col gap-3">
-                    <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-md transition text-base">Simpan Resep</button>
-                    <button type="button" id="btn-del-resep" onclick="deleteCurrentResep()" class="hidden w-full bg-white border border-red-200 text-red-500 font-bold py-4 rounded-2xl hover:bg-red-50 transition text-base">Hapus Resep</button>
+                    <button type="submit"
+                        class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-4 rounded-2xl shadow-md transition text-base">Simpan
+                        Resep</button>
+                    <button type="button" id="btn-del-resep" onclick="deleteCurrentResep()"
+                        class="hidden w-full bg-white border border-red-200 text-red-500 font-bold py-4 rounded-2xl hover:bg-red-50 transition text-base">Hapus
+                        Resep</button>
                 </div>
             </form>
+        </div>
+    </div>
+    <!-- CONFIRM POPUP MODAL -->
+    <div id="modal-confirm" class="modal-base fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+        <div class="modal-card relative w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col p-8 text-center border border-slate-100">
+            <div class="text-5xl mb-4">⚠️</div>
+            <h2 class="text-xl font-black text-slate-800 mb-2">Konfirmasi Hapus</h2>
+            <p id="confirm-message-text" class="text-slate-600 font-medium mb-8 leading-relaxed text-sm"></p>
+            <div class="flex gap-3">
+                <button type="button" id="confirm-btn-cancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition text-sm">Batal</button>
+                <button type="button" id="confirm-btn-ok" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-md transition text-sm">Hapus</button>
+            </div>
         </div>
     </div>
     <!-- WELCOME POPUP MODAL -->
     <div id="modal-welcome" class="modal-base fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div onclick="closeWelcomeModal()" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
-        <div class="modal-card relative w-full max-w-sm bg-pink-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col p-8 text-center border-4 border-pink-100">
+        <div
+            class="modal-card relative w-full max-w-sm bg-pink-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col p-8 text-center border-4 border-pink-100">
             <div class="text-6xl mb-4 animate-bounce">💖</div>
             <h2 class="text-xl font-black text-pink-600 mb-4">Hai Mimiy!</h2>
             <p id="welcome-message-text" class="text-slate-700 font-bold mb-8 leading-relaxed text-[15px]"></p>
-            <button type="button" onclick="closeWelcomeModal()" class="w-full bg-gradient-to-r from-pink-400 to-rose-400 text-white font-black py-4 rounded-2xl shadow-lg hover:from-pink-500 hover:to-rose-500 transition-all text-base transform hover:-translate-y-1">
+            <button type="button" onclick="closeWelcomeModal()"
+                class="w-full bg-gradient-to-r from-pink-400 to-rose-400 text-white font-black py-4 rounded-2xl shadow-lg hover:from-pink-500 hover:to-rose-500 transition-all text-base transform hover:-translate-y-1">
                 Iya Sayang, Makasih! 😘
             </button>
         </div>
@@ -638,13 +1360,13 @@
     <script>
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZ3MOrka7jzLlIki1QD3RvGTci4scXlHTehGGWv9nQ2HTdxi8YQFTupxX1aZNoPlYU/exec';
         let dbRiwayatPR = [];
-        
+
         let dbRiwayatDaily = [];
         let dbResep = [];
         let currentResepId = null;
         let activeResepFilter = 'Semua';
 
-        let stockState = { makanan: {}, snack: {} };
+        let stockState = { makanan: {}, snack: {}, bahan: {} };
         let tempDailyMenuSelection = {}; // Holds quantities keyed by menu name while in modal
 
         const units = ['GRM', 'KG', 'PCS', 'IKAT', 'BKS', 'LTR', 'ML', 'BOX', 'PACK', 'LBR', 'BTL', 'KALENG'];
@@ -669,16 +1391,16 @@
         function setActiveTab(tabName) {
             ['view-form', 'view-daily', 'view-history', 'view-stock', 'view-resep'].forEach(id => document.getElementById(id).classList.add('hidden'));
             ['nav-form', 'nav-daily', 'nav-history', 'nav-stock', 'nav-resep'].forEach(id => document.getElementById(id).classList.replace('text-pink-600', 'text-slate-400'));
-            
+
             document.getElementById('view-' + tabName).classList.remove('hidden');
             document.getElementById('nav-' + tabName).classList.replace('text-slate-400', 'text-pink-600');
 
             const title = document.getElementById('header-title');
-            if(tabName==='form') title.innerText = "Form Purchase Request";
-            if(tabName==='daily') { title.innerText = "Daily Kitchen Report"; }
-            if(tabName==='history') { title.innerText = "Riwayat Dokumen"; if(!dbRiwayatPR.length && !dbRiwayatDaily.length) fetchHistory(); }
-            if(tabName==='stock') title.innerText = "Manajemen Stok Menu";
-            if(tabName==='resep') { title.innerText = "Buku Resep Vani"; if(!dbResep.length) fetchResep(); }
+            if (tabName === 'form') title.innerText = "Form Purchase Request";
+            if (tabName === 'daily') { title.innerText = "Daily Kitchen Report"; }
+            if (tabName === 'history') { title.innerText = "Riwayat Dokumen"; if (!dbRiwayatPR.length && !dbRiwayatDaily.length) fetchHistory(); }
+            if (tabName === 'stock') title.innerText = "Manajemen Stok Menu";
+            if (tabName === 'resep') { title.innerText = "Buku Resep Vani"; if (!dbResep.length) fetchResep(); }
         }
 
         document.getElementById('nav-form').addEventListener('click', () => { setActiveTab('form'); initFormPR(); });
@@ -698,7 +1420,7 @@
             const tbody = document.getElementById('table-items');
             const tr = document.createElement('tr');
             tr.className = "hover:bg-slate-50 row-item";
-            let optHTML = units.map(u => `<option value="${u}" ${unit===u?'selected':''}>${u}</option>`).join('');
+            let optHTML = units.map(u => `<option value="${u}" ${unit === u ? 'selected' : ''}>${u}</option>`).join('');
             tr.innerHTML = `
                 <td class="py-2 px-3 text-center text-slate-400 font-semibold row-no"></td>
                 <td class="py-2 px-3"><input type="text" class="i-desc w-full outline-none bg-transparent uppercase border-b border-transparent focus:border-pink-300" value="${desc}" placeholder="Nama barang..." required></td>
@@ -707,11 +1429,11 @@
                 <td class="py-2 px-3"><input type="text" class="i-rem w-full outline-none bg-transparent uppercase border-b border-transparent focus:border-pink-300" value="${remark}" required></td>
                 <td class="py-2 px-3 text-center"><button type="button" class="btn-del text-slate-400 font-bold px-2 py-1 bg-slate-100 rounded hover:bg-red-50 hover:text-red-500">X</button></td>
             `;
-            tr.querySelector('.btn-del').addEventListener('click', () => { if(tbody.children.length>1) { tr.remove(); updateNoPR(); } else showToast('Minimal 1 barang.', 'warning'); });
+            tr.querySelector('.btn-del').addEventListener('click', () => { if (tbody.children.length > 1) { tr.remove(); updateNoPR(); } else showToast('Minimal 1 barang.', 'warning'); });
             tbody.appendChild(tr); updateNoPR();
         }
 
-        function updateNoPR() { document.querySelectorAll('.row-item').forEach((r, i) => r.querySelector('.row-no').innerText = i+1); }
+        function updateNoPR() { document.querySelectorAll('.row-item').forEach((r, i) => r.querySelector('.row-no').innerText = i + 1); }
         document.getElementById('btn-add-row').addEventListener('click', () => createRowPR());
 
         document.getElementById('main-form').addEventListener('submit', async (e) => {
@@ -725,30 +1447,34 @@
                     remark: row.querySelector('.i-rem').value.toUpperCase()
                 });
             });
-            const payload = { type: 'pr', action: 'save', data: {
-                ID_PR: document.getElementById('id_pr').value.toUpperCase(),
-                TGL_REQUEST: document.getElementById('tgl_request').value,
-                TGL_BUTUH: document.getElementById('tgl_butuh').value,
-                DEPARTEMEN: document.getElementById('departemen').value.toUpperCase(),
-                DATA_BARANG: JSON.stringify(items)
-            }};
+            const payload = {
+                type: 'pr', action: 'save', data: {
+                    ID_PR: document.getElementById('id_pr').value.toUpperCase(),
+                    TGL_REQUEST: document.getElementById('tgl_request').value,
+                    TGL_BUTUH: document.getElementById('tgl_butuh').value,
+                    DEPARTEMEN: document.getElementById('departemen').value.toUpperCase(),
+                    DATA_BARANG: JSON.stringify(items)
+                }
+            };
+            showLoading('Menyimpan Dokumen PR...');
             await sendData(payload, 'PR tersimpan!');
+            hideLoading();
         });
 
         // ================== FITUR DAILY REPORT ==================
         function getTodayDateStr() {
             const d = new Date();
-            const pad = n => n<10 ? '0'+n : n;
-            return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+            const pad = n => n < 10 ? '0' + n : n;
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
         }
         function getGeneratedDailyId() {
             const d = new Date();
-            const pad = n => n<10 ? '0'+n : n;
-            return `DKR-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+            const pad = n => n < 10 ? '0' + n : n;
+            return `DKR-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
         }
 
         function initDailyForm(isEdit = false) {
-            if(!isEdit) {
+            if (!isEdit) {
                 document.getElementById('daily-form').reset();
                 document.getElementById('daily_id').value = getGeneratedDailyId();
                 document.getElementById('daily_tanggal').value = getTodayDateStr();
@@ -789,7 +1515,7 @@
                     <span class="font-semibold text-slate-700 text-sm">${item}</span>
                     <div class="flex items-center gap-2">
                         <button type="button" class="w-8 h-8 bg-slate-100 rounded-md font-bold text-slate-600" onclick="adjustPickerQty('${item}', -1)">-</button>
-                        <span class="w-6 text-center font-bold" id="picker-qty-${item.replace(/\s+/g,'')}">${qty}</span>
+                        <span class="w-6 text-center font-bold" id="picker-qty-${item.replace(/\s+/g, '')}">${qty}</span>
                         <button type="button" class="w-8 h-8 bg-pink-100 text-pink-600 rounded-md font-bold" onclick="adjustPickerQty('${item}', 1)">+</button>
                     </div>
                 `;
@@ -800,9 +1526,9 @@
         function adjustPickerQty(item, change) {
             let qty = tempDailyMenuSelection[item] || 0;
             qty += change;
-            if(qty < 0) qty = 0;
+            if (qty < 0) qty = 0;
             tempDailyMenuSelection[item] = qty;
-            document.getElementById('picker-qty-'+item.replace(/\s+/g,'')).innerText = qty;
+            document.getElementById('picker-qty-' + item.replace(/\s+/g, '')).innerText = qty;
         }
 
         function applyDailyMenuSelection() {
@@ -814,8 +1540,8 @@
             const container = document.getElementById('daily-menu-container');
             container.innerHTML = '';
             let hasSelection = false;
-            for(const [item, qty] of Object.entries(tempDailyMenuSelection)) {
-                if(qty > 0) {
+            for (const [item, qty] of Object.entries(tempDailyMenuSelection)) {
+                if (qty > 0) {
                     hasSelection = true;
                     container.innerHTML += `
                         <div class="flex justify-between items-center bg-pink-50 border border-pink-200 p-2.5 rounded-lg">
@@ -825,7 +1551,7 @@
                     `;
                 }
             }
-            if(!hasSelection) {
+            if (!hasSelection) {
                 container.innerHTML = '<div class="col-span-full text-center text-sm text-slate-400 py-4 border border-dashed border-slate-300 rounded-xl">Belum ada menu yang dipilih.</div>';
             }
         }
@@ -834,26 +1560,30 @@
             e.preventDefault();
             // Validasi menu
             const menuArr = [];
-            for(const [nama, qty] of Object.entries(tempDailyMenuSelection)) {
-                if(qty > 0) menuArr.push({ nama, qty });
+            for (const [nama, qty] of Object.entries(tempDailyMenuSelection)) {
+                if (qty > 0) menuArr.push({ nama, qty });
             }
             // Pekerjaan
             const jobArr = [];
             document.querySelectorAll('.job-row .i-job').forEach(inp => {
-                if(inp.value.trim()) jobArr.push(inp.value.trim());
+                if (inp.value.trim()) jobArr.push(inp.value.trim());
             });
 
             const shiftVal = document.querySelector('input[name="daily_shift"]:checked').value;
 
-            const payload = { type: 'daily', action: 'save', data: {
-                ID_REPORT: document.getElementById('daily_id').value,
-                TANGGAL: document.getElementById('daily_tanggal').value,
-                SHIFT: shiftVal,
-                DATA_MENU: JSON.stringify(menuArr),
-                DATA_PEKERJAAN: JSON.stringify(jobArr)
-            }};
+            const payload = {
+                type: 'daily', action: 'save', data: {
+                    ID_REPORT: document.getElementById('daily_id').value,
+                    TANGGAL: document.getElementById('daily_tanggal').value,
+                    SHIFT: shiftVal,
+                    DATA_MENU: JSON.stringify(menuArr),
+                    DATA_PEKERJAAN: JSON.stringify(jobArr)
+                }
+            };
+            showLoading('Menyimpan Laporan Harian...');
             await sendData(payload, 'Laporan Harian Tersimpan!');
             initDailyForm(false);
+            hideLoading();
         });
 
         // ================== HISTORY & FETCH ==================
@@ -862,8 +1592,8 @@
             document.getElementById('tab-hist-daily').classList.remove('active');
             document.getElementById('wrap-hist-pr').classList.add('hidden');
             document.getElementById('wrap-hist-daily').classList.add('hidden');
-            
-            if(tab === 'pr') {
+
+            if (tab === 'pr') {
                 document.getElementById('tab-hist-pr').classList.add('active');
                 document.getElementById('wrap-hist-pr').classList.remove('hidden');
                 document.getElementById('hist-title').innerText = "DOKUMEN PURCHASE REQUEST";
@@ -891,12 +1621,12 @@
             const tbody = document.getElementById('table-history-pr');
             tbody.innerHTML = '';
             if (!dbRiwayatPR.length) return tbody.innerHTML = '<tr><td colspan="3" class="py-8 text-center text-slate-400">Kosong.</td></tr>';
-            
+
             const formatDateText = (isoStr) => {
-                if(typeof isoStr === 'string' && isoStr.includes('T')) {
+                if (typeof isoStr === 'string' && isoStr.includes('T')) {
                     const d = new Date(isoStr);
-                    const pad = n => n<10 ? '0'+n : n;
-                    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+                    const pad = n => n < 10 ? '0' + n : n;
+                    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
                 }
                 return isoStr;
             };
@@ -906,8 +1636,8 @@
                 try {
                     const arr = JSON.parse(row.DATA_BARANG);
                     arr.slice(0, 2).forEach(i => itemsHTML += `<div class="text-xs truncate">${i.qty} ${i.unit} - ${i.desc}</div>`);
-                    if(arr.length>2) itemsHTML += `<div class="text-[10px] text-pink-500 font-bold">+${arr.length-2} item lain</div>`;
-                } catch(e) {}
+                    if (arr.length > 2) itemsHTML += `<div class="text-[10px] text-pink-500 font-bold">+${arr.length - 2} item lain</div>`;
+                } catch (e) { }
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="py-3 px-4 align-top"><div class="font-bold text-slate-800">${row.ID_PR}</div><div class="text-[10px] text-slate-500 mt-1">${formatDateText(row.TGL_REQUEST)}</div></td>
@@ -928,7 +1658,7 @@
             const tbody = document.getElementById('table-history-daily');
             tbody.innerHTML = '';
             if (!dbRiwayatDaily.length) return tbody.innerHTML = '<tr><td colspan="3" class="py-8 text-center text-slate-400">Kosong.</td></tr>';
-            
+
             dbRiwayatDaily.forEach(row => {
                 let txt = '';
                 try {
@@ -936,7 +1666,7 @@
                     let totalMenu = arr.length;
                     let totalPorsi = arr.reduce((acc, curr) => acc + curr.qty, 0);
                     txt = `<span class="font-bold text-pink-600">${totalMenu} Macam Menu</span> (${totalPorsi} Porsi Total)`;
-                } catch(e) {}
+                } catch (e) { }
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition">
                         <td class="py-3 px-4 align-top"><div class="font-bold text-slate-800">${row.ID_REPORT}</div><div class="text-[10px] text-slate-500 mt-1">${row.TANGGAL} | ${row.SHIFT}</div></td>
@@ -954,7 +1684,8 @@
         }
 
         async function deleteData(type, id) {
-            if (!confirm(`Hapus data ${id}?`)) return;
+            const isConfirmed = await showConfirm(`Hapus data ${id}?`);
+            if (!isConfirmed) return;
             const key = type === 'pr' ? 'ID_PR' : 'ID_REPORT';
             await sendData({ type: type, action: 'delete', data: { [key]: id } }, 'Berhasil dihapus');
             fetchHistory();
@@ -962,15 +1693,15 @@
 
         function editDataPR(id) {
             const row = dbRiwayatPR.find(d => d.ID_PR === id);
-            if(!row) return;
-            
+            if (!row) return;
+
             document.getElementById('id_pr').value = row.ID_PR;
-            
+
             const formatForInput = (isoStr) => {
-                if(typeof isoStr === 'string' && isoStr.includes('T')) {
+                if (typeof isoStr === 'string' && isoStr.includes('T')) {
                     const d = new Date(isoStr);
-                    const pad = n => n<10 ? '0'+n : n;
-                    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+                    const pad = n => n < 10 ? '0' + n : n;
+                    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
                 }
                 return isoStr;
             };
@@ -985,28 +1716,28 @@
                 JSON.parse(row.DATA_BARANG).forEach(i => {
                     createRowPR(i.desc, i.qty, i.unit, i.remark);
                 });
-            } catch(e){}
+            } catch (e) { }
 
             setActiveTab('form');
         }
 
         function editDataDaily(id) {
             const row = dbRiwayatDaily.find(d => d.ID_REPORT === id);
-            if(!row) return;
+            if (!row) return;
             document.getElementById('daily_id').value = row.ID_REPORT;
             document.getElementById('daily_tanggal').value = row.TANGGAL;
             document.querySelectorAll('input[name="daily_shift"]').forEach(r => r.checked = (r.value === row.SHIFT));
-            
+
             tempDailyMenuSelection = {};
             try {
                 JSON.parse(row.DATA_MENU).forEach(m => tempDailyMenuSelection[m.nama] = m.qty);
-            } catch(e){}
+            } catch (e) { }
             renderDailyMenuSelection();
 
             document.getElementById('pekerjaan-container').innerHTML = '';
             try {
                 JSON.parse(row.DATA_PEKERJAAN).forEach(j => addPekerjaanRow(j));
-            } catch(e){}
+            } catch (e) { }
 
             setActiveTab('daily');
         }
@@ -1016,7 +1747,7 @@
             try {
                 await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 showToast(successMsg, 'success');
-            } catch(e) { showToast('Gagal memproses ke server.', 'error'); }
+            } catch (e) { showToast('Gagal memproses ke server.', 'error'); }
             finally { setStatus('', false); }
         }
 
@@ -1025,15 +1756,19 @@
             try {
                 const res = await fetch(APPS_SCRIPT_URL + "?type=stok");
                 const json = await res.json();
-                if(json.data) { stockState.makanan = json.data.makanan || {}; stockState.snack = json.data.snack || {}; }
+                if (json.data) { 
+                    stockState.makanan = json.data.makanan || {}; 
+                    stockState.snack = json.data.snack || {}; 
+                    stockState.bahan = json.data.bahan || {};
+                }
                 renderStockList();
-            } catch(e){}
+            } catch (e) { }
         }
 
         function updateStock(category, item, change) {
             let cur = stockState[category][item] || 0;
             cur += change;
-            if(cur < 0) cur = 0;
+            if (cur < 0) cur = 0;
             stockState[category][item] = cur;
             renderStockList();
         }
@@ -1045,20 +1780,38 @@
                 const cur = stockState[category][item] || 0;
                 const isHabis = cur === 0;
                 container.innerHTML += `
-                    <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border ${isHabis?'border-red-200 bg-red-50/20':'border-slate-100 border-l-4 border-l-pink-500'}">
+                    <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border ${isHabis ? 'border-red-200 bg-red-50/20' : 'border-slate-100 border-l-4 border-l-pink-500'}">
                         <div class="flex-1 pr-2">
-                            <h3 class="font-semibold text-[13px] ${isHabis?'text-red-500 line-through':'text-slate-800'}">${item}</h3>
+                            <h3 class="font-semibold text-[13px] ${isHabis ? 'text-red-500 line-through' : 'text-slate-800'}">${item}</h3>
                         </div>
-                        <div class="flex items-center space-x-1 bg-slate-50 p-1 rounded-lg border border-slate-200">
-                            <button onclick="updateStock('${category}','${item}',-1)" class="w-8 h-8 rounded bg-white text-slate-600 shadow-sm">-</button>
-                            <div class="w-8 text-center font-bold text-sm select-none ${isHabis?'text-red-500':''}">${cur}</div>
-                            <button onclick="updateStock('${category}','${item}',1)" class="w-8 h-8 rounded bg-pink-500 text-white shadow-sm">+</button>
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center space-x-1 bg-slate-50 p-1 rounded-lg border border-slate-200">
+                                <button onclick="updateStock('${category}','${item}',-1)" class="w-8 h-8 rounded bg-white text-slate-600 shadow-sm">-</button>
+                                <div class="w-8 text-center font-bold text-sm select-none ${isHabis ? 'text-red-500' : ''}">${cur}</div>
+                                <button onclick="updateStock('${category}','${item}',1)" class="w-8 h-8 rounded bg-pink-500 text-white shadow-sm">+</button>
+                            </div>
+                            <button onclick="deleteStockItem('${category}','${item}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors border border-red-100 shadow-sm shrink-0" title="Hapus Stok">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
                         </div>
                     </div>
                 `;
             });
         }
-        function renderStockList() { renderStockCategory('makanan','stock-makanan-list'); renderStockCategory('snack','stock-snack-list'); }
+        function renderStockList() { 
+            renderStockCategory('makanan', 'stock-makanan-list'); 
+            renderStockCategory('snack', 'stock-snack-list'); 
+            renderStockCategory('bahan', 'stock-bahan-list');
+        }
+
+        async function deleteStockItem(category, item) {
+            const confirmed = await showConfirm(`Hapus '${item}' dari daftar stok?`);
+            if (confirmed) {
+                delete stockState[category][item];
+                renderStockList();
+                saveStockData();
+            }
+        }
 
         async function saveStockData() {
             await sendData({ type: 'stok', action: 'save', data: stockState }, 'Stok Menu Tersimpan!');
@@ -1070,17 +1823,17 @@
             document.getElementById('modal-tambah-menu').classList.add('modal-open');
         }
         function closeAddMenuModal() { document.getElementById('modal-tambah-menu').classList.remove('modal-open'); }
-        function adjustModalQty(id, change) { const inp = document.getElementById(id); let v = parseInt(inp.value)||0; v+=change; if(v<0)v=0; inp.value=v; }
-        
+        function adjustModalQty(id, change) { const inp = document.getElementById(id); let v = parseInt(inp.value) || 0; v += change; if (v < 0) v = 0; inp.value = v; }
+
         function submitAddMenu(e) {
             e.preventDefault();
             const cat = document.getElementById('input-kategori-menu').value;
             const nm = document.getElementById('input-nama-menu').value.trim();
-            const q = parseInt(document.getElementById('input-jumlah-stok').value)||0;
-            if(!nm) return;
+            const q = parseInt(document.getElementById('input-jumlah-stok').value) || 0;
+            if (!nm) return;
             const nmUp = nm.charAt(0).toUpperCase() + nm.slice(1);
-            if(stockState[cat] && stockState[cat].hasOwnProperty(nmUp)) return showToast('Menu sudah ada', 'warning');
-            if(!stockState[cat]) stockState[cat] = {};
+            if (stockState[cat] && stockState[cat].hasOwnProperty(nmUp)) return showToast('Menu sudah ada', 'warning');
+            if (!stockState[cat]) stockState[cat] = {};
             stockState[cat][nmUp] = q;
             closeAddMenuModal(); renderStockList(); saveStockData();
         }
@@ -1091,23 +1844,23 @@
             if (!data) return;
             document.getElementById('print-dept').innerText = data.DEPARTEMEN;
             document.getElementById('print-id').innerText = data.ID_PR;
-            
+
             const formatDatePrint = (isoStr) => {
-                if(typeof isoStr === 'string' && isoStr.includes('T')) {
+                if (typeof isoStr === 'string' && isoStr.includes('T')) {
                     const d = new Date(isoStr);
-                    const pad = n => n<10 ? '0'+n : n;
-                    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+                    const pad = n => n < 10 ? '0' + n : n;
+                    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
                 }
                 return isoStr;
             };
 
             document.getElementById('print-tgl-req').innerText = formatDatePrint(data.TGL_REQUEST);
             document.getElementById('print-tgl-bth').innerText = formatDatePrint(data.TGL_BUTUH);
-            
+
             const tbody = document.getElementById('print-items');
             tbody.innerHTML = '';
             JSON.parse(data.DATA_BARANG).forEach((i, idx) => {
-                tbody.innerHTML += `<tr><td class="text-center">${idx+1}</td><td>${i.desc}</td><td class="text-center">${i.qty}</td><td class="text-center">${i.unit}</td><td class="text-right">${i.remark}</td></tr>`;
+                tbody.innerHTML += `<tr><td class="text-center">${idx + 1}</td><td>${i.desc}</td><td class="text-center">${i.qty}</td><td class="text-center">${i.unit}</td><td class="text-right">${i.remark}</td></tr>`;
             });
             document.getElementById('print-pr-section').classList.add('is-printing'); window.print();
             setTimeout(() => document.getElementById('print-pr-section').classList.remove('is-printing'), 500);
@@ -1115,7 +1868,7 @@
 
         function printStockData() {
             const tbody = document.getElementById('print-stock-items'); tbody.innerHTML = '';
-            
+
             // Format Tanggal untuk Highlight (Contoh: Sabtu, 25 April 2026)
             const d = new Date();
             const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -1124,9 +1877,9 @@
             document.getElementById('print-stock-time').innerText = dStr;
 
             let c = 1;
-            ['makanan','snack'].forEach(cat => {
-                const keys = Object.keys(stockState[cat]||{});
-                if(keys.length) {
+            ['makanan', 'snack', 'bahan'].forEach(cat => {
+                const keys = Object.keys(stockState[cat] || {});
+                if (keys.length) {
                     tbody.innerHTML += `<tr><td colspan="4" style="background:#fce7f3!important;color:#9d174d!important;font-weight:900;text-align:center;letter-spacing:1px;-webkit-print-color-adjust: exact;">${cat.toUpperCase()}</td></tr>`;
                     keys.forEach(k => {
                         const s = stockState[cat][k];
@@ -1134,11 +1887,11 @@
                         const statusTxt = isHabis ? 'KOSONG' : 'READY';
                         const statusColor = isHabis ? '#e11d48' : '#10b981';
                         const statusBg = isHabis ? '#ffe4e6' : '#d1fae5';
-                        
+
                         tbody.innerHTML += `<tr>
                             <td class="text-center font-semibold text-slate-500">${c++}</td>
-                            <td style="font-weight: 700; ${isHabis?'color:#f43f5e;font-style:italic;':'color:#334155;'}">${k}</td>
-                            <td class="text-center font-bold" style="font-size:13px; ${isHabis?'color:#f43f5e;':'color:#db2777;'}">${s}</td>
+                            <td style="font-weight: 700; ${isHabis ? 'color:#f43f5e;font-style:italic;' : 'color:#334155;'}">${k}</td>
+                            <td class="text-center font-bold" style="font-size:13px; ${isHabis ? 'color:#f43f5e;' : 'color:#db2777;'}">${s}</td>
                             <td class="text-center"><span style="font-size:10px; font-weight:800; background:${statusBg}!important; color:${statusColor}!important; padding:3px 6px; border-radius:6px; -webkit-print-color-adjust: exact;">${statusTxt}</span></td>
                         </tr>`;
                     });
@@ -1151,9 +1904,9 @@
         function printDataDaily(id) {
             const row = dbRiwayatDaily.find(d => d.ID_REPORT === id);
             if (!row) return;
-            
+
             document.getElementById('print-daily-id').innerText = row.ID_REPORT;
-            
+
             // Format Tanggal untuk Highlight (Contoh: Sabtu, 25 April 2026)
             let tglStr = row.TANGGAL;
             try {
@@ -1163,30 +1916,30 @@
                     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                     tglStr = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
                 }
-            } catch(e) {}
+            } catch (e) { }
             document.getElementById('print-daily-tgl').innerText = tglStr;
-            
+
             document.getElementById('print-daily-shift').innerText = row.SHIFT;
-            
-            const tMenu = document.getElementById('print-daily-menu-items'); tMenu.innerHTML='';
+
+            const tMenu = document.getElementById('print-daily-menu-items'); tMenu.innerHTML = '';
             try {
                 JSON.parse(row.DATA_MENU).forEach((m, i) => {
-                    tMenu.innerHTML += `<tr><td class="text-center">${i+1}</td><td class="font-bold">${m.nama}</td><td class="text-center font-bold" style="color:#db2777">${m.qty} Porsi</td></tr>`;
+                    tMenu.innerHTML += `<tr><td class="text-center">${i + 1}</td><td class="font-bold">${m.nama}</td><td class="text-center font-bold" style="color:#db2777">${m.qty} Porsi</td></tr>`;
                 });
-            } catch(e){}
-            
-            const tJob = document.getElementById('print-daily-job-items'); tJob.innerHTML='';
+            } catch (e) { }
+
+            const tJob = document.getElementById('print-daily-job-items'); tJob.innerHTML = '';
             try {
                 JSON.parse(row.DATA_PEKERJAAN).forEach((j, i) => {
-                    tJob.innerHTML += `<tr><td class="text-center">${i+1}</td><td>${j}</td></tr>`;
+                    tJob.innerHTML += `<tr><td class="text-center">${i + 1}</td><td>${j}</td></tr>`;
                 });
-            } catch(e){}
+            } catch (e) { }
 
             document.getElementById('print-daily-section').classList.add('is-printing'); window.print();
             setTimeout(() => document.getElementById('print-daily-section').classList.remove('is-printing'), 500);
         }
 
-        
+
         // ================== BUKU RESEP ==================
         async function fetchResep() {
             setStatus('Loading Resep...', true);
@@ -1195,7 +1948,7 @@
                 const json = await res.json();
                 dbResep = json.data || [];
                 renderRecipes();
-            } catch(e) {}
+            } catch (e) { }
             finally { setStatus('', false); }
         }
 
@@ -1212,14 +1965,14 @@
             const container = document.getElementById('resep-list');
             container.innerHTML = '';
             const query = document.getElementById('search-resep').value.toLowerCase();
-            
+
             let filtered = dbResep.filter(r => {
                 const matchName = r.NAMA_MENU.toLowerCase().includes(query);
                 const matchCat = activeResepFilter === 'Semua' || r.KATEGORI === activeResepFilter;
                 return matchName && matchCat;
             });
 
-            if(!filtered.length) {
+            if (!filtered.length) {
                 container.innerHTML = '<div class="text-center py-10 text-slate-400 font-medium">Resep tidak ditemukan.</div>';
                 return;
             }
@@ -1247,15 +2000,15 @@
 
         function openDetailResep(id) {
             const r = dbResep.find(x => x.ID_RESEP === id);
-            if(!r) return;
+            if (!r) return;
             currentResepId = id;
             document.getElementById('dtl-img').src = getDirectImageUrl(r.URL_GAMBAR);
             document.getElementById('dtl-cat').innerText = r.KATEGORI;
             document.getElementById('dtl-nama').innerText = r.NAMA_MENU;
             document.getElementById('dtl-desc').innerText = r.DESKRIPSI || '-';
-            
+
             const ulBahan = document.getElementById('dtl-bahan'); ulBahan.innerHTML = '';
-            try { 
+            try {
                 JSON.parse(r.BAHAN).forEach(b => {
                     let txt = '';
                     if (typeof b === 'string') txt = b;
@@ -1264,11 +2017,11 @@
                         txt = `<span class="font-bold">${b.nama}</span> <span class="text-slate-500 italic">(${qtyStr}${b.unit})</span>`;
                     }
                     ulBahan.innerHTML += `<li class="flex items-start"><span class="mr-2 text-pink-500 mt-0.5">•</span><span class="text-slate-700">${txt}</span></li>`;
-                }); 
-            } catch(e){}
-            
+                });
+            } catch (e) { }
+
             const divLangkah = document.getElementById('dtl-langkah'); divLangkah.innerHTML = '';
-            try { JSON.parse(r.LANGKAH).forEach((l, i) => divLangkah.innerHTML += `<div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-pink-100 text-pink-600 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">${i+1}</div><p class="text-sm text-slate-700 font-medium pt-0.5">${l}</p></div>`); } catch(e){}
+            try { JSON.parse(r.LANGKAH).forEach((l, i) => divLangkah.innerHTML += `<div class="flex items-start gap-3"><div class="w-6 h-6 rounded-full bg-pink-100 text-pink-600 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">${i + 1}</div><p class="text-sm text-slate-700 font-medium pt-0.5">${l}</p></div>`); } catch (e) { }
 
             document.getElementById('dtl-notes').innerText = r.NOTES || '-';
             document.getElementById('dtl-notes-container').style.display = r.NOTES ? 'block' : 'none';
@@ -1283,15 +2036,15 @@
             document.getElementById('r_bahan_container').innerHTML = '';
             document.getElementById('r_langkah_container').innerHTML = '';
             removeSelectedImage();
-            
-            if(id) { // Edit
+
+            if (id) { // Edit
                 const r = dbResep.find(x => x.ID_RESEP === id);
                 document.getElementById('form-resep-title').innerText = 'Edit Resep';
                 document.getElementById('r_id').value = r.ID_RESEP;
                 document.getElementById('r_nama').value = r.NAMA_MENU;
                 document.getElementById('r_kat').value = r.KATEGORI;
                 document.getElementById('r_url').value = r.URL_GAMBAR || '';
-                
+
                 if (r.URL_GAMBAR) {
                     document.getElementById('r_img_preview').src = getDirectImageUrl(r.URL_GAMBAR);
                     document.getElementById('r_img_preview_container').classList.remove('hidden');
@@ -1301,13 +2054,13 @@
                 document.getElementById('r_desc').value = r.DESKRIPSI;
                 document.getElementById('r_notes').value = r.NOTES;
                 document.getElementById('r_stock').checked = String(r.IN_STOCK) === 'true';
-                try { 
+                try {
                     JSON.parse(r.BAHAN).forEach(b => {
-                        if(typeof b === 'string') addBahanRow({nama: b, qty: '', unit: 'secukupnya'});
+                        if (typeof b === 'string') addBahanRow({ nama: b, qty: '', unit: 'secukupnya' });
                         else addBahanRow(b);
-                    }); 
-                } catch(e){}
-                try { JSON.parse(r.LANGKAH).forEach(l => addListRow('r_langkah', l)); } catch(e){}
+                    });
+                } catch (e) { }
+                try { JSON.parse(r.LANGKAH).forEach(l => addListRow('r_langkah', l)); } catch (e) { }
                 document.getElementById('btn-del-resep').classList.remove('hidden');
             } else { // Tambah
                 document.getElementById('form-resep-title').innerText = 'Tambah Resep Baru';
@@ -1324,7 +2077,7 @@
             const container = document.getElementById('r_bahan_container');
             const div = document.createElement('div');
             div.className = "flex gap-2 items-center row-dyn-bahan";
-            
+
             const nama = obj ? obj.nama : '';
             const qty = obj ? obj.qty : '';
             const unit = obj ? obj.unit : 'gram';
@@ -1333,19 +2086,19 @@
                 <input type="text" placeholder="Nama Bahan..." title="Nama Bahan" class="bahan-nama flex-1 px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-pink-300 font-medium text-slate-700" value="${nama}" required>
                 <input type="number" step="any" placeholder="Jml" title="Jumlah" class="bahan-qty w-16 px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-pink-300 font-medium text-slate-700" value="${qty}">
                 <select title="Unit Satuan" class="bahan-unit w-24 px-2 py-2 border border-slate-200 rounded-xl text-xs outline-none focus:border-pink-300 font-bold text-slate-700 bg-white">
-                    <option value="gram" ${unit==='gram'?'selected':''}>gram</option>
-                    <option value="kg" ${unit==='kg'?'selected':''}>kg</option>
-                    <option value="ml" ${unit==='ml'?'selected':''}>ml</option>
-                    <option value="liter" ${unit==='liter'?'selected':''}>liter</option>
-                    <option value="pcs" ${unit==='pcs'?'selected':''}>pcs</option>
-                    <option value="buah" ${unit==='buah'?'selected':''}>buah</option>
-                    <option value="lembar" ${unit==='lembar'?'selected':''}>lembar</option>
-                    <option value="siung" ${unit==='siung'?'selected':''}>siung</option>
-                    <option value="ikat" ${unit==='ikat'?'selected':''}>ikat</option>
-                    <option value="sdm" ${unit==='sdm'?'selected':''}>sdm</option>
-                    <option value="sdt" ${unit==='sdt'?'selected':''}>sdt</option>
-                    <option value="gelas" ${unit==='gelas'?'selected':''}>gelas</option>
-                    <option value="secukupnya" ${unit==='secukupnya'?'selected':''}>secukup</option>
+                    <option value="gram" ${unit === 'gram' ? 'selected' : ''}>gram</option>
+                    <option value="kg" ${unit === 'kg' ? 'selected' : ''}>kg</option>
+                    <option value="ml" ${unit === 'ml' ? 'selected' : ''}>ml</option>
+                    <option value="liter" ${unit === 'liter' ? 'selected' : ''}>liter</option>
+                    <option value="pcs" ${unit === 'pcs' ? 'selected' : ''}>pcs</option>
+                    <option value="buah" ${unit === 'buah' ? 'selected' : ''}>buah</option>
+                    <option value="lembar" ${unit === 'lembar' ? 'selected' : ''}>lembar</option>
+                    <option value="siung" ${unit === 'siung' ? 'selected' : ''}>siung</option>
+                    <option value="ikat" ${unit === 'ikat' ? 'selected' : ''}>ikat</option>
+                    <option value="sdm" ${unit === 'sdm' ? 'selected' : ''}>sdm</option>
+                    <option value="sdt" ${unit === 'sdt' ? 'selected' : ''}>sdt</option>
+                    <option value="gelas" ${unit === 'gelas' ? 'selected' : ''}>gelas</option>
+                    <option value="secukupnya" ${unit === 'secukupnya' ? 'selected' : ''}>secukup</option>
                 </select>
                 <button type="button" title="Hapus" class="w-9 h-9 shrink-0 flex items-center justify-center bg-slate-50 border border-slate-200 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition" onclick="this.parentElement.remove()">X</button>
             `;
@@ -1365,37 +2118,37 @@
 
         function handleImageSelect(e) {
             const file = e.target.files[0];
-            if(!file) return;
-            
+            if (!file) return;
+
             // Limit to 5MB before compression processing to avoid browser crash
-            if(file.size > 5 * 1024 * 1024) {
+            if (file.size > 5 * 1024 * 1024) {
                 alert("Ukuran file maksimal 5MB!");
                 return;
             }
 
             document.getElementById('r_file_name').innerText = file.name;
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = function () {
                     const canvas = document.createElement('canvas');
                     const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
                     let width = img.width; let height = img.height;
-                    
+
                     if (width > height) {
                         if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                     } else {
                         if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                     }
-                    
+
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    
+
                     // Compress to JPEG 75% quality
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
                     document.getElementById('r_base64').value = dataUrl;
-                    
+
                     document.getElementById('r_img_preview').src = dataUrl;
                     document.getElementById('r_img_preview_container').classList.remove('hidden');
                 }
@@ -1406,7 +2159,7 @@
 
         function removeSelectedImage() {
             const fileInput = document.getElementById('r_file');
-            if(fileInput) fileInput.value = "";
+            if (fileInput) fileInput.value = "";
             document.getElementById('r_file_name').innerText = "Belum ada foto";
             document.getElementById('r_base64').value = "";
             document.getElementById('r_url').value = "";
@@ -1420,45 +2173,47 @@
             const nm = document.getElementById('r_nama').value.trim();
             const kat = document.getElementById('r_kat').value;
             const isStock = document.getElementById('r_stock').checked;
-            
-            let bahan = []; 
+
+            let bahan = [];
             document.querySelectorAll('#r_bahan_container .row-dyn-bahan').forEach(row => {
                 const n = row.querySelector('.bahan-nama').value.trim();
                 const q = row.querySelector('.bahan-qty').value;
                 const u = row.querySelector('.bahan-unit').value;
-                if(n) bahan.push({ nama: n, qty: q, unit: u });
+                if (n) bahan.push({ nama: n, qty: q, unit: u });
             });
-            
-            let langkah = []; 
-            document.querySelectorAll('#r_langkah_container input').forEach(i => { if(i.value.trim()) langkah.push(i.value.trim()); });
 
-            const payload = { type: 'resep', action: 'save', data: {
-                ID_RESEP: id, NAMA_MENU: nm, KATEGORI: kat,
-                URL_GAMBAR: document.getElementById('r_url').value,
-                IMAGE_BASE64: document.getElementById('r_base64').value,
-                DESKRIPSI: document.getElementById('r_desc').value,
-                BAHAN: JSON.stringify(bahan), LANGKAH: JSON.stringify(langkah),
-                NOTES: document.getElementById('r_notes').value,
-                IN_STOCK: isStock
-            }};
-            
+            let langkah = [];
+            document.querySelectorAll('#r_langkah_container input').forEach(i => { if (i.value.trim()) langkah.push(i.value.trim()); });
+
+            const payload = {
+                type: 'resep', action: 'save', data: {
+                    ID_RESEP: id, NAMA_MENU: nm, KATEGORI: kat,
+                    URL_GAMBAR: document.getElementById('r_url').value,
+                    IMAGE_BASE64: document.getElementById('r_base64').value,
+                    DESKRIPSI: document.getElementById('r_desc').value,
+                    BAHAN: JSON.stringify(bahan), LANGKAH: JSON.stringify(langkah),
+                    NOTES: document.getElementById('r_notes').value,
+                    IN_STOCK: isStock
+                }
+            };
+
             setStatus('Menyimpan Resep...', true);
             showLoading('Mengunggah Foto & Menyimpan Resep...');
-            
+
             try {
                 await sendData(payload, 'Resep berhasil disimpan!');
-                
+
                 // Sync Stok Logic
                 const nmUp = nm.charAt(0).toUpperCase() + nm.slice(1);
                 let catL = kat.toLowerCase();
                 let stockChanged = false;
-                if(isStock) {
-                    if(!stockState[catL]) stockState[catL] = {};
-                    if(stockState[catL][nmUp] === undefined) { stockState[catL][nmUp] = 0; stockChanged = true; }
+                if (isStock) {
+                    if (!stockState[catL]) stockState[catL] = {};
+                    if (stockState[catL][nmUp] === undefined) { stockState[catL][nmUp] = 0; stockChanged = true; }
                 } else {
-                    if(stockState[catL] && stockState[catL][nmUp] !== undefined) { delete stockState[catL][nmUp]; stockChanged = true; }
+                    if (stockState[catL] && stockState[catL][nmUp] !== undefined) { delete stockState[catL][nmUp]; stockChanged = true; }
                 }
-                if(stockChanged) { saveStockData(); renderStockList(); }
+                if (stockChanged) { saveStockData(); renderStockList(); }
 
                 closeFormResep(); closeDetailResep(); fetchResep();
             } catch (error) {
@@ -1470,12 +2225,13 @@
         }
 
         async function deleteCurrentResep() {
-            if(!confirm('Hapus resep ini secara permanen?')) return;
+            const isConfirmed = await showConfirm('Hapus resep ini secara permanen?');
+            if (!isConfirmed) return;
             const id = document.getElementById('r_id').value;
             await sendData({ type: 'resep', action: 'delete', data: { ID_RESEP: id } }, 'Resep terhapus!');
             closeFormResep(); closeDetailResep(); fetchResep();
         }
-        
+
         // ================== INIT ==================
 
         function initWelcomePopup() {
@@ -1493,10 +2249,10 @@
             if (!lastTime || (now - lastTime) > COOLDOWN_TIME) {
                 const randomMsg = messages[Math.floor(Math.random() * messages.length)];
                 document.getElementById('welcome-message-text').innerText = randomMsg;
-                
+
                 setTimeout(() => {
                     const modal = document.getElementById('modal-welcome');
-                    if(modal) modal.classList.add('modal-open');
+                    if (modal) modal.classList.add('modal-open');
                 }, 1000); // Wait 1s after load for smooth entrance
 
                 localStorage.setItem('welcome_popup_time', now.toString());
@@ -1505,7 +2261,7 @@
 
         function closeWelcomeModal() {
             const modal = document.getElementById('modal-welcome');
-            if(modal) modal.classList.remove('modal-open');
+            if (modal) modal.classList.remove('modal-open');
         }
 
         function showLoading(text = "Memproses Data...") {
@@ -1522,10 +2278,34 @@
         }
 
         function showToast(msg, type) { /* Reuse logic */
-            const box = document.createElement('div'); box.className=`toast toast-${type}`;
-            box.innerHTML=`<div class="toast-icon">✓</div><span>${msg}</span>`;
+            const box = document.createElement('div'); box.className = `toast toast-${type}`;
+            box.innerHTML = `<div class="toast-icon">✓</div><span>${msg}</span>`;
             document.getElementById('toast-container').appendChild(box);
-            setTimeout(() => { box.classList.add('toast-out'); setTimeout(()=>box.remove(),300); }, 3000);
+            setTimeout(() => { box.classList.add('toast-out'); setTimeout(() => box.remove(), 300); }, 3000);
+        }
+
+        function showConfirm(message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('modal-confirm');
+                const text = document.getElementById('confirm-message-text');
+                const btnOk = document.getElementById('confirm-btn-ok');
+                const btnCancel = document.getElementById('confirm-btn-cancel');
+
+                text.innerText = message;
+                modal.classList.add('modal-open');
+
+                const handleOk = () => { cleanup(); resolve(true); };
+                const handleCancel = () => { cleanup(); resolve(false); };
+                
+                const cleanup = () => {
+                    modal.classList.remove('modal-open');
+                    btnOk.removeEventListener('click', handleOk);
+                    btnCancel.removeEventListener('click', handleCancel);
+                };
+
+                btnOk.addEventListener('click', handleOk);
+                btnCancel.addEventListener('click', handleCancel);
+            });
         }
 
         initFormPR();
@@ -1536,4 +2316,5 @@
 
     </script>
 </body>
+
 </html>
