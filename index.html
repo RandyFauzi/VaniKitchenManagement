@@ -2858,7 +2858,18 @@
                 const res = await fetch(APPS_SCRIPT_URL + '?type=jadwal', { redirect: 'follow' });
                 const text = await res.text();
                 const json = JSON.parse(text);
-                dbJadwal = json.data || [];
+                
+                // Format otomatis jika PERIODE berupa tanggal ISO (e.g. 2026-03-31T16:00:00.000Z)
+                dbJadwal = (json.data || []).map(item => {
+                    if (item.PERIODE && typeof item.PERIODE === 'string' && item.PERIODE.includes('T') && item.PERIODE.endsWith('Z')) {
+                        const d = new Date(item.PERIODE);
+                        if (!isNaN(d.getTime())) {
+                            item.PERIODE = `${BULAN_NAMES[d.getMonth()]} ${d.getFullYear()}`;
+                        }
+                    }
+                    return item;
+                });
+                
                 renderJadwalList();
             } catch (e) {
                 console.error('fetchJadwal error:', e);
