@@ -505,6 +505,27 @@
                 font-size: 13px;
                 color: #db2777;
             }
+
+            /* Force compact A4 portrait feel for Stock + Daily reports */
+            #print-stock-menu-section.is-printing,
+            #print-stock-bahan-section.is-printing,
+            #print-daily-section.is-printing {
+                padding: 3mm !important;
+            }
+
+            #print-stock-menu-section table,
+            #print-stock-bahan-section table,
+            #print-daily-section table {
+                margin-bottom: 8px !important;
+            }
+
+            #print-stock-menu-section .pink-signature-box,
+            #print-stock-bahan-section .pink-signature-box,
+            #print-daily-section .pink-signature-box {
+                margin-top: 8px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
         }
 
 
@@ -1141,11 +1162,25 @@
                 <form id="form-tambah-menu" onsubmit="submitAddMenu(event)">
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Kategori</label>
-                        <select id="input-kategori-menu" required title="Kategori Menu"
+                        <select id="input-kategori-menu" required title="Kategori Menu" onchange="toggleUnitField()"
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none font-bold text-slate-700">
                             <option value="makanan">🍔 Makanan</option>
                             <option value="snack">🍟 Snack</option>
                             <option value="bahan_dapur">🥬 Bahan Operational Dapur</option>
+                        </select>
+                    </div>
+                    <div id="unit-field-wrapper" class="mb-5 hidden">
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Satuan Item</label>
+                        <select id="input-satuan-bahan" title="Satuan Bahan"
+                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none font-bold text-slate-700">
+                            <option value="pcs">pcs</option>
+                            <option value="kg">kg</option>
+                            <option value="gram">gram</option>
+                            <option value="liter">liter</option>
+                            <option value="ml">ml</option>
+                            <option value="pack">pack</option>
+                            <option value="botol">botol</option>
+                            <option value="ikat">ikat</option>
                         </select>
                     </div>
                     <div class="mb-5">
@@ -1743,6 +1778,15 @@
         let activeResepFilter = 'Semua';
 
         let stockState = { makanan: {}, snack: {}, bahan_dapur: {} };
+        function normalizeBahanStockValue(val) {
+            if (val && typeof val === 'object') {
+                return {
+                    qty: Number(val.qty) || 0,
+                    unit: (val.unit || 'pcs').toString()
+                };
+            }
+            return { qty: Number(val) || 0, unit: 'pcs' };
+        }
 
         // Sub-tab switcher untuk view-stock
         function switchStokTab(tab) {
@@ -2185,16 +2229,26 @@
                     stockState.makanan = json.data.makanan || {};
                     stockState.snack = json.data.snack || {};
                     stockState.bahan_dapur = json.data.bahan_dapur || {};
+                    Object.keys(stockState.bahan_dapur).forEach(name => {
+                        stockState.bahan_dapur[name] = normalizeBahanStockValue(stockState.bahan_dapur[name]);
+                    });
                 }
                 renderStockList();
             } catch (e) { console.error('fetchStockData error:', e); }
         }
 
         function updateStock(category, item, change) {
-            let cur = stockState[category][item] || 0;
-            cur += change;
-            if (cur < 0) cur = 0;
-            stockState[category][item] = cur;
+            if (category === 'bahan_dapur') {
+                const curr = normalizeBahanStockValue(stockState[category][item]);
+                let curQty = curr.qty + change;
+                if (curQty < 0) curQty = 0;
+                stockState[category][item] = { qty: curQty, unit: curr.unit };
+            } else {
+                let cur = stockState[category][item] || 0;
+                cur += change;
+                if (cur < 0) cur = 0;
+                stockState[category][item] = cur;
+            }
             renderStockList();
         }
 
@@ -2202,12 +2256,16 @@
             const container = document.getElementById(containerId);
             container.innerHTML = '';
             Object.keys(stockState[category] || {}).forEach(item => {
-                const cur = stockState[category][item] || 0;
+                const rawVal = stockState[category][item];
+                const normalized = category === 'bahan_dapur' ? normalizeBahanStockValue(rawVal) : null;
+                const cur = category === 'bahan_dapur' ? normalized.qty : (rawVal || 0);
+                const unitLabel = category === 'bahan_dapur' ? normalized.unit : '';
                 const isHabis = cur === 0;
                 container.innerHTML += `
                     <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-sm border ${isHabis ? 'border-red-200 bg-red-50/20' : 'border-slate-100 border-l-4 border-l-pink-500'}">
                         <div class="flex-1 pr-2">
                             <h3 class="font-semibold text-[13px] ${isHabis ? 'text-red-500 line-through' : 'text-slate-800'}">${item}</h3>
+                            ${category === 'bahan_dapur' ? `<p class="text-[10px] font-bold uppercase tracking-wide text-slate-400 mt-1">${unitLabel}</p>` : ''}
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="flex items-center space-x-1 bg-slate-50 p-1 rounded-lg border border-slate-200">
@@ -2245,25 +2303,70 @@
         function openAddMenuModal() {
             document.getElementById('form-tambah-menu').reset();
             document.getElementById('input-jumlah-stok').value = 1;
+            toggleUnitField();
             document.getElementById('modal-tambah-menu').classList.add('modal-open');
         }
         function closeAddMenuModal() { document.getElementById('modal-tambah-menu').classList.remove('modal-open'); }
         function adjustModalQty(id, change) { const inp = document.getElementById(id); let v = parseInt(inp.value) || 0; v += change; if (v < 0) v = 0; inp.value = v; }
+        function toggleUnitField() {
+            const cat = document.getElementById('input-kategori-menu').value;
+            const unitWrap = document.getElementById('unit-field-wrapper');
+            unitWrap.classList.toggle('hidden', cat !== 'bahan_dapur');
+        }
 
         function submitAddMenu(e) {
             e.preventDefault();
             const cat = document.getElementById('input-kategori-menu').value;
             const nm = document.getElementById('input-nama-menu').value.trim();
             const q = parseInt(document.getElementById('input-jumlah-stok').value) || 0;
+            const unit = document.getElementById('input-satuan-bahan').value || 'pcs';
             if (!nm) return;
             const nmUp = nm.charAt(0).toUpperCase() + nm.slice(1);
             if (stockState[cat] && stockState[cat].hasOwnProperty(nmUp)) return showToast('Menu sudah ada', 'warning');
             if (!stockState[cat]) stockState[cat] = {};
-            stockState[cat][nmUp] = q;
+            stockState[cat][nmUp] = cat === 'bahan_dapur' ? { qty: q, unit } : q;
             closeAddMenuModal(); renderStockList(); saveStockData();
         }
 
         // ================== PRINTING ==================
+        function runPrint(sectionId, fileNameBase = 'Export', pageSize = null) {
+            const sectionEl = document.getElementById(sectionId);
+            if (!sectionEl) return;
+
+            sectionEl.classList.add('is-printing');
+            const oldTitle = document.title;
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const cleanBase = String(fileNameBase || 'Export').replace(/[\\/:*?"<>|]/g, '-').trim();
+            document.title = `${cleanBase}_${y}-${m}-${d}`;
+
+            let pageStyleEl = null;
+            if (pageSize) {
+                pageStyleEl = document.createElement('style');
+                pageStyleEl.id = 'dynamic-print-page-style';
+                pageStyleEl.textContent = `@page { size: ${pageSize} !important; margin: 8mm !important; }`;
+                document.head.appendChild(pageStyleEl);
+            }
+
+            let cleaned = false;
+            const cleanup = () => {
+                if (cleaned) return;
+                cleaned = true;
+                sectionEl.classList.remove('is-printing');
+                document.title = oldTitle;
+                if (pageStyleEl && pageStyleEl.parentNode) pageStyleEl.parentNode.removeChild(pageStyleEl);
+                window.removeEventListener('afterprint', cleanup);
+            };
+
+            window.addEventListener('afterprint', cleanup, { once: true });
+            window.print();
+
+            // Fallback untuk browser/device yang tidak konsisten memicu afterprint.
+            setTimeout(cleanup, 10000);
+        }
+
         function printDataPR(id) {
             const data = dbRiwayatPR.find(d => d.ID_PR === id);
             if (!data) return;
@@ -2287,8 +2390,7 @@
             JSON.parse(data.DATA_BARANG).forEach((i, idx) => {
                 tbody.innerHTML += `<tr><td class="text-center">${idx + 1}</td><td>${i.desc}</td><td class="text-center">${i.qty}</td><td class="text-center">${i.unit}</td><td class="text-right">${i.remark}</td></tr>`;
             });
-            document.getElementById('print-pr-section').classList.add('is-printing'); window.print();
-            setTimeout(() => document.getElementById('print-pr-section').classList.remove('is-printing'), 500);
+            runPrint('print-pr-section', `PR_${data.ID_PR || 'Dokumen'}`);
         }
 
         // ================== CETAK STOK MENU (Makanan + Snack) ==================
@@ -2323,9 +2425,7 @@
                 });
             });
 
-            document.getElementById('print-stock-menu-section').classList.add('is-printing');
-            window.print();
-            setTimeout(() => document.getElementById('print-stock-menu-section').classList.remove('is-printing'), 500);
+            runPrint('print-stock-menu-section', 'Stok_Menu', 'A4 portrait');
         }
 
         // ================== CETAK STOK BAHAN (Pink theme, 2-col compact, 1 halaman) ==================
@@ -2336,7 +2436,7 @@
             document.getElementById('print-stock-bahan-time').innerText =
                 `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 
-            // Build a compact 2-column table block (2 items side by side per row)
+            // Build single-column table block (1 item per row)
             function buildBahanBlock(categoryKey, emoji, label) {
                 const items = Object.entries(stockState[categoryKey] || {});
                 if (!items.length) return '<p style="color:#be185d;font-size:10px;padding:4px 0;">— Tidak ada data —</p>';
@@ -2345,36 +2445,28 @@
                 let html = `<table style="width:100%;border-collapse:separate;border-spacing:0;margin-bottom:12px;border:1px solid #fce7f3;border-radius:8px;overflow:hidden;">
                     <thead>
                         <tr>
-                            <td colspan="4" style="background:#fce7f3!important;color:#9d174d!important;font-weight:900;letter-spacing:1px;padding:6px 10px;font-size:10.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">${emoji} ${label}</td>
+                            <td colspan="3" style="background:#fce7f3!important;color:#9d174d!important;font-weight:900;letter-spacing:1px;padding:6px 10px;font-size:10.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;">${emoji} ${label}</td>
                         </tr>
                         <tr>
-                            <th style="background:#fdf2f8!important;color:#be185d!important;font-weight:800;text-transform:uppercase;font-size:9px;padding:4px 8px;border:1px solid #fce7f3;width:42%;-webkit-print-color-adjust:exact;print-color-adjust:exact;">Nama Bahan</th>
-                            <th style="background:#fdf2f8!important;color:#be185d!important;font-weight:800;text-transform:uppercase;font-size:9px;padding:4px 8px;border:1px solid #fce7f3;width:8%;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;">Stok</th>
-                            <th style="background:#fdf2f8!important;color:#be185d!important;font-weight:800;text-transform:uppercase;font-size:9px;padding:4px 8px;border:1px solid #fce7f3;width:42%;-webkit-print-color-adjust:exact;print-color-adjust:exact;">Nama Bahan</th>
-                            <th style="background:#fdf2f8!important;color:#be185d!important;font-weight:800;text-transform:uppercase;font-size:9px;padding:4px 8px;border:1px solid #fce7f3;width:8%;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;">Stok</th>
+                            <th style="background:#fdf2f8!important;color:#be185d!important;font-weight:800;text-transform:uppercase;font-size:9px;padding:4px 8px;border:1px solid #fce7f3;width:62%;-webkit-print-color-adjust:exact;print-color-adjust:exact;">Nama Bahan</th>
+                            <th style="background:#fdf2f8!important;color:#be185d!important;font-weight:800;text-transform:uppercase;font-size:9px;padding:4px 8px;border:1px solid #fce7f3;width:18%;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;">Qty</th>
+                            <th style="background:#fdf2f8!important;color:#be185d!important;font-weight:800;text-transform:uppercase;font-size:9px;padding:4px 8px;border:1px solid #fce7f3;width:20%;text-align:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;">Satuan</th>
                         </tr>
                     </thead>
                     <tbody>`;
 
-                for (let i = 0; i < items.length; i += 2) {
-                    const even = (Math.floor(i / 2) % 2 === 0);
+                for (let i = 0; i < items.length; i++) {
+                    const even = (i % 2 === 0);
                     const rowBg = even ? 'background:#fffafb!important;' : '';
-                    const [n1, q1] = items[i];
+                    const [n1, raw1] = items[i];
+                    const nrm1 = normalizeBahanStockValue(raw1);
+                    const q1 = nrm1.qty;
+                    const u1 = nrm1.unit;
                     const h1 = q1 === 0;
-                    const item2 = items[i + 1];
-                    let col2 = '';
-                    if (item2) {
-                        const [n2, q2] = item2;
-                        const h2 = q2 === 0;
-                        col2 = `<td style="${rowBg}border:1px solid #fce7f3;border-bottom:1px dashed #fce7f3;padding:5px 8px;font-size:10px;font-weight:700;${h2 ? 'color:#f43f5e;text-decoration:line-through;' : 'color:#475569;'}">${n2}</td>
-                                 <td style="${rowBg}border:1px solid #fce7f3;border-bottom:1px dashed #fce7f3;padding:5px 8px;font-size:11px;font-weight:900;text-align:center;${h2 ? 'color:#f43f5e;' : 'color:#db2777;'};-webkit-print-color-adjust:exact;print-color-adjust:exact;">${q2}</td>`;
-                    } else {
-                        col2 = `<td style="${rowBg}border:1px solid #fce7f3;"></td><td style="${rowBg}border:1px solid #fce7f3;"></td>`;
-                    }
                     html += `<tr>
                         <td style="${rowBg}border:1px solid #fce7f3;border-bottom:1px dashed #fce7f3;padding:5px 8px;font-size:10px;font-weight:700;${h1 ? 'color:#f43f5e;text-decoration:line-through;' : 'color:#475569;'}">${n1}</td>
                         <td style="${rowBg}border:1px solid #fce7f3;border-bottom:1px dashed #fce7f3;padding:5px 8px;font-size:11px;font-weight:900;text-align:center;${h1 ? 'color:#f43f5e;' : 'color:#db2777;'};-webkit-print-color-adjust:exact;print-color-adjust:exact;">${q1}</td>
-                        ${col2}
+                        <td style="${rowBg}border:1px solid #fce7f3;border-bottom:1px dashed #fce7f3;padding:5px 8px;font-size:10px;font-weight:800;text-align:center;${h1 ? 'color:#f43f5e;' : 'color:#be185d;'};-webkit-print-color-adjust:exact;print-color-adjust:exact;">${u1}</td>
                     </tr>`;
                 }
 
@@ -2385,9 +2477,7 @@
             document.getElementById('print-bahan-dapur-block').innerHTML =
                 buildBahanBlock('bahan_dapur', '🥬', 'BAHAN OPERATIONAL DAPUR');
 
-            document.getElementById('print-stock-bahan-section').classList.add('is-printing');
-            window.print();
-            setTimeout(() => document.getElementById('print-stock-bahan-section').classList.remove('is-printing'), 500);
+            runPrint('print-stock-bahan-section', 'Stok_Bahan_Operational', 'A4 portrait');
         }
 
 
@@ -2426,8 +2516,7 @@
                 });
             } catch (e) { }
 
-            document.getElementById('print-daily-section').classList.add('is-printing'); window.print();
-            setTimeout(() => document.getElementById('print-daily-section').classList.remove('is-printing'), 500);
+            runPrint('print-daily-section', `Daily_Report_${row.ID_REPORT || 'Dokumen'}`, 'A4 portrait');
         }
 
 
@@ -3244,9 +3333,7 @@
                 catatanEl.innerText = '';
             }
 
-            document.getElementById('print-jadwal-section').classList.add('is-printing');
-            window.print();
-            setTimeout(() => document.getElementById('print-jadwal-section').classList.remove('is-printing'), 500);
+            runPrint('print-jadwal-section', `Jadwal_Menu_${data.PERIODE || 'Dokumen'}`);
         }
 
     </script>
