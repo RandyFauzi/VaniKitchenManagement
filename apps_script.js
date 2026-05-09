@@ -9,7 +9,7 @@ function doGet(e) {
   const type = (e.parameter.type || 'pr').toLowerCase();
 
   if (type === 'stok') {
-    // Ambil Data Stok (6 Kolom: Makanan, Snack, Bahan Operational Dapur)
+    // Ambil Data Stok (7 Kolom: + satuan untuk Bahan Operational Dapur)
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetStokName);
     if (!sheet) return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: 'Sheet data_stok tidak ditemukan' })).setMimeType(ContentService.MimeType.JSON);
 
@@ -26,8 +26,13 @@ function doGet(e) {
       if (row[0]) result.makanan[row[0]] = Number(row[1]) || 0;
       // Kolom C (2) & D (3) -> Snack
       if (row[2]) result.snack[row[2]] = Number(row[3]) || 0;
-      // Kolom E (4) & F (5) -> Bahan Operational Dapur
-      if (row[4]) result.bahan_dapur[row[4]] = Number(row[5]) || 0;
+      // Kolom E (4), F (5), G (6) -> Bahan Operational Dapur
+      if (row[4]) {
+        result.bahan_dapur[row[4]] = {
+          qty: Number(row[5]) || 0,
+          unit: row[6] || "pcs"
+        };
+      }
     });
 
     return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: result }))
@@ -160,11 +165,11 @@ function doPost(e) {
 
     if (action === 'save') {
       sheet.clear();
-      // Header 6 kolom
+      // Header 7 kolom
       sheet.appendRow([
         "NAMA_MENU_MAKANAN", "JUMLAH_STOK_MAKANAN",
         "NAMA_MENU_SNACK", "JUMLAH_STOK_SNACK",
-        "NAMA_BAHAN_OPERATIONAL_DAPUR", "JUMLAH_STOK_BAHAN_OPERATIONAL_DAPUR"
+        "NAMA_BAHAN_OPERATIONAL_DAPUR", "JUMLAH_STOK_BAHAN_OPERATIONAL_DAPUR", "SATUAN_BAHAN_OPERATIONAL_DAPUR"
       ]);
 
       const dataMakanan = data.makanan || {};
@@ -184,12 +189,24 @@ function doPost(e) {
         const sName = snackEntries[i] ? snackEntries[i][0] : "";
         const sQty  = snackEntries[i] ? snackEntries[i][1] : "";
         const bdName = bahanDapurEntries[i] ? bahanDapurEntries[i][0] : "";
-        const bdQty  = bahanDapurEntries[i] ? bahanDapurEntries[i][1] : "";
-        rows.push([mName, mQty, sName, sQty, bdName, bdQty]);
+        const bdVal  = bahanDapurEntries[i] ? bahanDapurEntries[i][1] : "";
+        let bdQty = "";
+        let bdUnit = "";
+        if (bdVal !== "") {
+          if (typeof bdVal === "object" && bdVal !== null) {
+            bdQty = Number(bdVal.qty) || 0;
+            bdUnit = bdVal.unit || "pcs";
+          } else {
+            // Backward compatibility jika frontend lama kirim angka langsung
+            bdQty = Number(bdVal) || 0;
+            bdUnit = "pcs";
+          }
+        }
+        rows.push([mName, mQty, sName, sQty, bdName, bdQty, bdUnit]);
       }
 
       if (rows.length > 0) {
-        sheet.getRange(2, 1, rows.length, 6).setValues(rows);
+        sheet.getRange(2, 1, rows.length, 7).setValues(rows);
       }
       return ContentService.createTextOutput(JSON.stringify({ status: 'success', message: 'Stok Tersimpan' })).setMimeType(ContentService.MimeType.JSON);
     }
