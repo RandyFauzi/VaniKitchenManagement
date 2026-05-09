@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -935,7 +935,7 @@
                             <button id="tab-stok-menu" onclick="switchStokTab('menu')"
                                 class="tab-btn flex-1 text-sm active">🍽️ Stok Menu</button>
                             <button id="tab-stok-bahan" onclick="switchStokTab('bahan')"
-                                class="tab-btn flex-1 text-sm">🥬 Stok Bahan</button>
+                                class="tab-btn flex-1 text-sm">🥬 Stok Bahan Operational</button>
                         </div>
                     </div>
 
@@ -987,23 +987,14 @@
                                 <div
                                     class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center mr-3">
                                     🥬</div>
-                                Bahan DAPUR
+                                Bahan Operational Dapur
                             </h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="stock-bahan-dapur-list"></div>
-                        </div>
-                        <div class="mb-6">
-                            <h2 class="text-base font-bold text-slate-800 mb-3 flex items-center">
-                                <div
-                                    class="w-8 h-8 rounded-full bg-teal-100 text-teal-500 flex items-center justify-center mr-3">
-                                    ☕</div>
-                                Bahan KAFE
-                            </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="stock-bahan-kafe-list"></div>
                         </div>
                         <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-3">
                             <button type="button" onclick="saveStockData()"
                                 class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-md transition-all flex items-center justify-center text-[15px]">Simpan
-                                Stok Bahan</button>
+                                Stok Bahan Operational</button>
                             <button type="button" onclick="openAddMenuModal()"
                                 class="w-full bg-white border-2 border-orange-400 hover:bg-orange-50 text-orange-600 font-bold py-4 rounded-xl shadow-sm transition-all flex items-center justify-center text-[15px]">+
                                 Tambah Bahan Baru</button>
@@ -1014,7 +1005,7 @@
                                         d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
                                     </path>
                                 </svg>
-                                Cetak Laporan Stok Bahan
+                                Cetak Laporan Stok Bahan Operational
                             </button>
                         </div>
                     </div>
@@ -1154,8 +1145,7 @@
                             class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none font-bold text-slate-700">
                             <option value="makanan">🍔 Makanan</option>
                             <option value="snack">🍟 Snack</option>
-                            <option value="bahan_dapur">🥬 Bahan Dapur</option>
-                            <option value="bahan_kafe">☕ Bahan Kafe</option>
+                            <option value="bahan_dapur">🥬 Bahan Operational Dapur</option>
                         </select>
                     </div>
                     <div class="mb-5">
@@ -1260,118 +1250,185 @@
         </div>
     </div>
 
-    <!-- PRINT: JADWAL MENU -->
-    <div id="print-jadwal-section">
+    <!-- PRINT: JADWAL MENU BULANAN -->
+    <div id="print-jadwal-section" class="pink-report-wrapper">
         <style>
-            #print-jadwal-section.is-printing {
-                font-family: Arial, sans-serif;
-                font-size: 11px;
-                color: #000;
+            @media print {
+                @page {
+                    size: A4 landscape;
+                    margin: 6mm;
+                }
+
+                #print-jadwal-section.is-printing {
+                    display: flex !important;
+                    flex-direction: column;
+                    page-break-after: avoid;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    padding: 3mm !important;
+                    height: 198mm;
+                    box-sizing: border-box;
+                }
+            }
+
+            #print-jadwal-section {
+                padding: 3mm !important;
+                border-width: 1px !important;
+                border-radius: 10px !important;
+            }
+
+            #print-jadwal-section .pj-header {
+                text-align: center;
+                margin-bottom: 6px;
+            }
+
+            #print-jadwal-section .pj-title {
+                margin: 0;
+                font-size: 17px;
+                font-weight: 900;
+                letter-spacing: .8px;
+                color: #9d174d;
+                text-transform: uppercase;
+            }
+
+            #print-jadwal-section .pj-subtitle {
+                margin-top: 2px;
+                font-size: 9px;
+                font-weight: 700;
+                color: #64748b;
             }
 
             #print-jadwal-section table {
                 width: 100%;
-                border-collapse: collapse;
-                margin-top: 10px;
+                border-collapse: separate;
+                border-spacing: 0;
+                border: 1px solid #fbcfe8;
+                border-radius: 12px;
+                overflow: hidden;
+                table-layout: fixed;
+                margin-bottom: 6px;
+                height: 100%;
+            }
+
+            #print-jadwal-section .pj-table-wrap {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+            }
+
+            #print-jadwal-section .pj-table-wrap table {
+                flex: 1;
             }
 
             #print-jadwal-section th {
-                background-color: #bbf7d0 !important;
+                background: #fce7f3 !important;
+                color: #be185d !important;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: .4px;
+                font-size: 8.5px;
+                padding: 4px 5px;
+                border: 1px solid #fbcfe8;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-                color: #14532d;
-                font-weight: bold;
-                padding: 8px 6px;
-                border: 1px solid #000;
-                text-align: center;
             }
 
             #print-jadwal-section td {
-                padding: 7px 6px;
-                border: 1px solid #000;
+                border: 1px solid #fbcfe8;
+                padding: 2px 5px;
+                font-size: 8.5px;
+                line-height: 1;
+                color: #334155;
                 vertical-align: top;
-            }
-
-            #print-jadwal-section tr.jadwal-hl {
-                background-color: #fef08a !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
 
-            .pj-title {
+            #print-jadwal-section tr:nth-child(even):not(.jadwal-hl) td {
+                background: #fffafb !important;
+            }
+
+            #print-jadwal-section tr.jadwal-hl td {
+                background: #ffe4e6 !important;
+                color: #9f1239;
+                font-weight: 700;
+            }
+
+            .pj-col-day {
+                width: 11%;
                 text-align: center;
-                font-size: 16px;
-                font-weight: 900;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                margin: 0 0 12px 0;
+                font-weight: 800;
             }
 
-            .pj-th-hari {
-                width: 10%
-            }
-
-            .pj-th-tgl {
-                width: 12%
-            }
-
-            .pj-th-menu {
-                width: 39%
-            }
-
-            .pj-catatan {
-                margin-top: 16px;
+            .pj-col-date {
+                width: 13%;
                 text-align: center;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+            .pj-col-menu {
+                width: 36.5%;
+            }
+
+            #print-jadwal-catatan {
+                margin-top: 5px;
+                border: 1px dashed #f9a8d4;
+                border-radius: 10px;
+                background: #fff1f2;
+                color: #9d174d;
+                padding: 4px 7px;
+                font-size: 8px;
                 font-style: italic;
-                font-weight: bold;
-                font-size: 11px;
-            }
-
-            .pj-footer-wrap {
-                display: flex;
-                justify-content: flex-end;
-                margin-top: 40px;
-                padding-right: 10px;
-            }
-
-            .pj-footer-box {
                 text-align: center;
-                width: 180px;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
-            .pj-footer-lbl {
-                margin-bottom: 60px;
-                font-size: 11px;
+            #print-jadwal-section .pink-signature-box {
+                margin-top: 4px;
+                padding: 5px 8px 3px;
+                width: 140px;
+                border-radius: 8px;
             }
 
-            .pj-footer-name {
-                font-weight: bold;
-                font-size: 12px;
-                text-decoration: underline;
+            #print-jadwal-section .pink-sig-img {
+                width: 36px;
+                margin: 2px auto 1px;
             }
 
-            .pr-sig-space {
-                height: 65px;
+            #print-jadwal-section .stk-sig-lbl {
+                margin: 0 0 2px 0;
+                font-size: 8px;
+            }
+
+            #print-jadwal-section .stk-sig-name {
+                margin: 0;
+                font-size: 10px;
             }
         </style>
-        <h1 id="print-jadwal-title" class="pj-title"></h1>
-        <table>
-            <thead>
-                <tr>
-                    <th class="pj-th-hari">HARI</th>
-                    <th class="pj-th-tgl">TANGGAL</th>
-                    <th class="pj-th-menu">MENU MASAKAN</th>
-                    <th class="pj-th-menu">MENU SAYURAN</th>
-                </tr>
-            </thead>
-            <tbody id="print-jadwal-tbody"></tbody>
-        </table>
-        <p id="print-jadwal-catatan" class="pj-catatan"></p>
-        <div class="pj-footer-wrap">
-            <div class="pj-footer-box">
-                <p class="pj-footer-lbl">DIBUAT OLEH,</p>
-                <p class="pj-footer-name">OKTIVANI NURJANAH</p>
-            </div>
+        <div class="pj-header">
+            <h1 id="print-jadwal-title" class="pj-title"></h1>
+            <p class="pj-subtitle">Jadwal Harian Masakan dan Sayuran</p>
+        </div>
+        <div class="pj-table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="pj-col-day">Hari</th>
+                        <th class="pj-col-date">Tanggal</th>
+                        <th class="pj-col-menu">Menu Masakan</th>
+                        <th class="pj-col-menu">Menu Sayuran</th>
+                    </tr>
+                </thead>
+                <tbody id="print-jadwal-tbody"></tbody>
+            </table>
+        </div>
+        <p id="print-jadwal-catatan"></p>
+        <div class="pink-signature-box">
+            <p class="stk-sig-lbl">Dibuat Oleh,</p>
+            <img src="https://i.imgur.com/cE7b4L4.png" alt="TTD" class="pink-sig-img">
+            <p class="stk-sig-name">OKTIVANI NURJANAH</p>
         </div>
     </div>
 
@@ -1399,16 +1456,14 @@
         </div>
     </div>
 
-    <!-- PRINT: STOK BAHAN (Bahan Dapur + Bahan Kafe) — Pink theme, compact 2-col, 1 halaman -->
+    <!-- PRINT: STOK BAHAN OPERATIONAL (Bahan Dapur) — Pink theme, compact 2-col, 1 halaman -->
     <div id="print-stock-bahan-section" class="pink-report-wrapper">
         <div class="stk-header">
-            <h1 class="stk-title">🌸 LAPORAN STOK BAHAN 🌸</h1>
+            <h1 class="stk-title">🌸 LAPORAN STOK BAHAN OPERATIONAL 🌸</h1>
             <p id="print-stock-bahan-time" class="stk-time"></p>
         </div>
         <!-- Blok Bahan Dapur -->
         <div id="print-bahan-dapur-block"></div>
-        <!-- Blok Bahan Kafe -->
-        <div id="print-bahan-kafe-block"></div>
         <div class="pink-signature-box">
             <p class="stk-sig-lbl">Diperiksa Oleh,</p>
             <img src="https://i.imgur.com/cE7b4L4.png" alt="TTD" class="pink-sig-img">
@@ -1687,7 +1742,7 @@
         let currentResepId = null;
         let activeResepFilter = 'Semua';
 
-        let stockState = { makanan: {}, snack: {}, bahan_dapur: {}, bahan_kafe: {} };
+        let stockState = { makanan: {}, snack: {}, bahan_dapur: {} };
 
         // Sub-tab switcher untuk view-stock
         function switchStokTab(tab) {
@@ -2130,7 +2185,6 @@
                     stockState.makanan = json.data.makanan || {};
                     stockState.snack = json.data.snack || {};
                     stockState.bahan_dapur = json.data.bahan_dapur || {};
-                    stockState.bahan_kafe = json.data.bahan_kafe || {};
                 }
                 renderStockList();
             } catch (e) { console.error('fetchStockData error:', e); }
@@ -2173,7 +2227,6 @@
             renderStockCategory('makanan', 'stock-makanan-list');
             renderStockCategory('snack', 'stock-snack-list');
             renderStockCategory('bahan_dapur', 'stock-bahan-dapur-list');
-            renderStockCategory('bahan_kafe', 'stock-bahan-kafe-list');
         }
 
         async function deleteStockItem(category, item) {
@@ -2330,9 +2383,7 @@
             }
 
             document.getElementById('print-bahan-dapur-block').innerHTML =
-                buildBahanBlock('bahan_dapur', '🥬', 'BAHAN DAPUR');
-            document.getElementById('print-bahan-kafe-block').innerHTML =
-                buildBahanBlock('bahan_kafe', '☕', 'BAHAN KAFE');
+                buildBahanBlock('bahan_dapur', '🥬', 'BAHAN OPERATIONAL DAPUR');
 
             document.getElementById('print-stock-bahan-section').classList.add('is-printing');
             window.print();
@@ -2676,13 +2727,18 @@
 
         function initWelcomePopup() {
             const messages = [
-                "Semangat yaa Mimiykuu sayangg kerjanyaaa. Love youuuU!!!! ❤️",
-                "Jangan lupa minum air yaa sayangkuuu, semangat masak-masaknya hari ini! 🥰",
-                "Haii cantikkk, semangat yaa urusin dapurnya hari ini. I'm so proud of you! 💖",
-                "Semangat kerjanya Mimiy sayang, pulangnya aku tunggu yaa. Love you so much! 🌸",
-                "Capek dikit nggak apa-apa yaa sayang, yang penting berkah. Semangat terus Mimiykuu! ✨"
+                "Semangat yaa Mimiyyy sayangg kerjanyaaa. Love youuuU dari Bibiyy!!!! ❤️",
+                "Jangan lupa minum air yaa Mimiyyy, semangat masak-masaknya hari ini! 🥰",
+                "Haii cantikkk, semangat yaa urusin dapurnya hari ini. Bibiyy bangga banget sama Mimiyyy! 💖",
+                "Semangat kerjanya Mimiyyy sayang, pulangnya Bibiyy tunggu yaa. Love you so much! 🌸",
+                "Capek dikit nggak apa-apa yaa Mimiyyy, yang penting berkah. Semangat terus! ✨",
+                "Mimiyyy hebat banget hari ini, Bibiyy selalu dukung dari mana pun. 💞",
+                "Kalau hari ini berat, pelan-pelan aja ya Mimiyyy. Bibiyy selalu di sini buat Mimiyyy. 🤍",
+                "Semoga kerjaan Mimiyyy lancar, dapurnya ramai rezeki, dan hati Mimiyyy tetap happy. 🌷",
+                "Makan dulu ya Mimiyyy sebelum sibuk, Bibiyy pengen Mimiyyy tetap kuat dan sehat. 🍀",
+                "Terima kasih udah jadi Mimiyyy yang luar biasa, Bibiyy sayang banget selamanya. 💘"
             ];
-            const COOLDOWN_TIME = 1.5 * 60 * 60 * 1000; // 1.5 hours in ms
+            const COOLDOWN_TIME = 1 * 60 * 60 * 1000; // 1 hour in ms
             const lastTime = localStorage.getItem('welcome_popup_time');
             const now = Date.now();
 
@@ -2856,7 +2912,7 @@
                 const res = await fetch(APPS_SCRIPT_URL + '?type=jadwal', { redirect: 'follow' });
                 const text = await res.text();
                 const json = JSON.parse(text);
-                
+
                 // Format otomatis jika PERIODE berupa tanggal ISO (e.g. 2026-03-31T16:00:00.000Z)
                 dbJadwal = (json.data || []).map(item => {
                     if (item.PERIODE && typeof item.PERIODE === 'string' && item.PERIODE.includes('T') && item.PERIODE.endsWith('Z')) {
@@ -2867,7 +2923,7 @@
                     }
                     return item;
                 });
-                
+
                 renderJadwalList();
             } catch (e) {
                 console.error('fetchJadwal error:', e);
@@ -3173,12 +3229,20 @@
             tbody.innerHTML = '';
             menuArr.forEach(row => {
                 const tr = document.createElement('tr');
-                if (row.highlight) tr.style.backgroundColor = '#fef08a';
-                tr.innerHTML = `<td>${row.hari}</td><td>${row.tanggal}</td><td>${row.menu_masakan || row.menu || ''}</td><td>${row.menu_sayuran || ''}</td>`;
+                if (row.highlight) tr.classList.add('jadwal-hl');
+                tr.innerHTML = `<td class="pj-col-day">${row.hari}</td><td class="pj-col-date">${row.tanggal}</td><td>${row.menu_masakan || row.menu || ''}</td><td>${row.menu_sayuran || ''}</td>`;
                 tbody.appendChild(tr);
             });
-            document.getElementById('print-jadwal-title').innerText = 'MENU BULAN ' + data.PERIODE.toUpperCase();
-            document.getElementById('print-jadwal-catatan').innerText = data.CATATAN_BAWAH || data.CATATAN || '';
+            document.getElementById('print-jadwal-title').innerText = 'JADWAL MENU ' + data.PERIODE.toUpperCase();
+            const catatanEl = document.getElementById('print-jadwal-catatan');
+            const catatan = (data.CATATAN_BAWAH || data.CATATAN || '').trim();
+            if (catatan) {
+                catatanEl.style.display = 'block';
+                catatanEl.innerText = `Catatan: ${catatan}`;
+            } else {
+                catatanEl.style.display = 'none';
+                catatanEl.innerText = '';
+            }
 
             document.getElementById('print-jadwal-section').classList.add('is-printing');
             window.print();
@@ -3189,3 +3253,6 @@
 </body>
 
 </html>
+
+
+
